@@ -25,6 +25,18 @@ def read_should_return_committed_content_when_view_is_head(tmp_path):
     assert content == "COMMITTED = 1\n"
 
 
+def read_should_return_staged_content_when_view_is_index(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"a.py": "HEAD = 1\n"})
+    (repo / "a.py").write_text("INDEX = 2\n")
+    subprocess.run(["git", "-C", str(repo), "add", "a.py"], check=True)
+    (repo / "a.py").write_text("WORKTREE = 3\n")
+
+    ws = Workspace(repo, "index")
+    content = ws.read("a.py")
+
+    assert content == "INDEX = 2\n"
+
+
 def tracked_files_should_skip_symlink_and_increment_skipped_n_when_view_is_worktree(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -42,6 +54,77 @@ def tracked_files_should_skip_symlink_and_increment_skipped_n_when_view_is_workt
     assert "real.py" in tracked
     assert "link.py" not in tracked
     assert ws.skipped_n >= 1
+
+
+def tracked_files_should_skip_gitlink_and_increment_skipped_n_when_view_is_worktree(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.email", "dev@example.test"], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "dev"], check=True)
+    (repo / "real.py").write_text("VALUE = 1\n")
+    subprocess.run(["git", "-C", str(repo), "add", "real.py"], check=True)
+    fake_sha = "1" * 40
+    subprocess.run(
+        ["git", "-C", str(repo), "update-index", "--add", "--cacheinfo",
+         f"160000,{fake_sha},sub"],
+        check=True,
+    )
+    subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "init"], check=True)
+
+    ws = Workspace(repo, "worktree")
+    tracked = ws.tracked_files()
+
+    assert "real.py" in tracked
+    assert "sub" not in tracked
+    assert ws.skipped_n >= 1
+
+
+def tracked_files_should_skip_binary_file_and_increment_skipped_n_when_view_is_worktree(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.email", "dev@example.test"], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "dev"], check=True)
+    (repo / "real.py").write_text("VALUE = 1\n")
+    (repo / "blob.bin").write_bytes(b"a\x00b")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "init"], check=True)
+
+    ws = Workspace(repo, "worktree")
+    tracked = ws.tracked_files()
+
+    assert "real.py" in tracked
+    assert "blob.bin" not in tracked
+    assert ws.skipped_n >= 1
+
+
+def read_should_return_cached_content_when_called_twice_after_file_removal(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"a.py": "X = 1\n"})
+    ws = Workspace(repo, "worktree")
+
+    first = ws.read("a.py")
+    (repo / "a.py").unlink()
+    second = ws.read("a.py")
+
+    assert first == "X = 1\n"
+    assert second == "X = 1\n"
+
+
+def tracked_files_should_return_cached_result_when_called_twice_with_same_glob(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"a.py": "X = 1\n", "b.py": "Y = 2\n"})
+    ws = Workspace(repo, "worktree")
+
+    first = ws.tracked_files("*.py")
+
+    def _forbidden_run_git(*args, **kwargs):
+        raise AssertionError(
+            "git should not be re-invoked for a memoized tracked_files call")
+
+    ws._run_git = _forbidden_run_git
+    second = ws.tracked_files("*.py")
+
+    assert second == first
 
 
 def ast_should_return_none_and_count_once_when_source_has_syntax_error(tmp_path):
