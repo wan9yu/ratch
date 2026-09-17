@@ -5,6 +5,7 @@ declined to examine so a check can distinguish an empty surface from a
 skipped one.
 """
 
+import ast as _ast
 import pathlib
 import subprocess
 
@@ -68,3 +69,15 @@ class Workspace:
             return (self.repo_root / path).read_bytes()
         spec = f":{path}" if self.view == "index" else f"HEAD:{path}"
         return self._run_git(["show", spec], text=False).stdout
+
+    def ast(self, path):
+        key = (self.view, path)
+        if key in self._ast_cache:
+            return self._ast_cache[key]
+        try:
+            tree = _ast.parse(self.read(path))
+        except SyntaxError:
+            self.unparseable_n += 1
+            tree = None
+        self._ast_cache[key] = tree
+        return tree

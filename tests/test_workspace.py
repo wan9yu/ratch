@@ -42,3 +42,15 @@ def tracked_files_should_skip_symlink_and_increment_skipped_n_when_view_is_workt
     assert "real.py" in tracked
     assert "link.py" not in tracked
     assert ws.skipped_n >= 1
+
+
+def ast_should_return_none_and_count_once_when_source_has_syntax_error(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"broken.py": "def (:\n    pass\n"})
+
+    ws = Workspace(repo, "worktree")
+    first = ws.ast("broken.py")
+    second = ws.ast("broken.py")
+
+    assert first is None
+    assert second is None
+    assert ws.unparseable_n == 1
