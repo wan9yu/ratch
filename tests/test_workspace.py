@@ -179,3 +179,18 @@ def commit_identity_should_include_committer_fields_distinct_from_author_when_vi
     assert identity["email"] == "author@example.test"
     assert identity["committer_name"] == "committer-dev"
     assert identity["committer_email"] == "committer@example.test"
+
+
+def commit_identity_should_return_empty_email_when_config_unset_and_view_is_index(tmp_path, monkeypatch):
+    repo = tmp_path / "bare"
+    repo.mkdir()
+    empty = tmp_path / "none.gitconfig"
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", str(empty))
+    monkeypatch.setenv("GIT_CONFIG_SYSTEM", str(empty))
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+
+    ws = Workspace(repo, "index")
+    identity = ws.commit_identity()
+
+    assert identity["email"] == ""
+    assert identity["name"] == ""
