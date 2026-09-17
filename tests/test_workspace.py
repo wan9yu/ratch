@@ -1,6 +1,8 @@
 """Tests for the git-backed Workspace over the worktree/index/HEAD views."""
 
+import datetime
 import os
+import pathlib
 import subprocess
 
 from ratch.testing import make_tmp_repo
@@ -194,3 +196,22 @@ def commit_identity_should_return_empty_email_when_config_unset_and_view_is_inde
 
     assert identity["email"] == ""
     assert identity["name"] == ""
+
+
+def git_log_should_return_head_hash_matching_run_rev_parse_when_no_range_given(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"a.py": "X = 1\n"})
+
+    ws = Workspace(repo, "worktree")
+    log = ws.git_log()
+    head = ws.run(["git", "-C", str(repo), "rev-parse", "HEAD"]).stdout.strip()
+
+    assert log.strip() == head
+
+
+def now_should_return_todays_date_when_called(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"a.py": "X = 1\n"})
+
+    ws = Workspace(repo, "worktree")
+    today = ws.now()
+
+    assert today == datetime.date.today()

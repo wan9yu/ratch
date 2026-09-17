@@ -125,3 +125,21 @@ class Workspace:
         name = self._run_git(["config", "user.name"]).stdout.strip()
         email = self._run_git(["config", "user.email"]).stdout.strip()
         return {"name": name, "email": email}
+
+    def git_log(self, rng=None, fmt="%H"):
+        args = ["log", "--format=" + fmt]
+        if rng is not None:
+            args.append(rng)
+        return self._run_git(args).stdout
+
+    def run(self, argv, cwd=None, env=None):
+        return subprocess.run(
+            argv,
+            cwd=str(cwd) if cwd is not None else str(self.repo_root),
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+    def now(self):
+        return datetime.date.today()
