@@ -1,6 +1,8 @@
 """Behavior specs for RunReport, derive_state, and Runner."""
+from unittest import mock
+
 from ratch.result import Finding, Result, State
-from ratch.runner import Runner, derive_state
+from ratch.runner import Runner, _worker_count, derive_state
 from ratch.testing import FakeWorkspace
 
 
@@ -97,3 +99,16 @@ def runner_should_mark_error_and_keep_running_other_checks_when_a_check_raises()
     assert report.results["boom"].state is State.ERROR
     assert report.results["ok"].state is State.PASS
     assert report.exit_code == 3
+
+
+def runner_should_size_workers_to_the_value_when_jobs_is_an_int():
+    workers = _worker_count(3)
+
+    assert workers == 3
+
+
+def runner_should_size_workers_to_cpu_minus_two_when_jobs_is_auto():
+    with mock.patch("ratch.runner.os.cpu_count", return_value=8):
+        workers = _worker_count("auto")
+
+    assert workers == 6

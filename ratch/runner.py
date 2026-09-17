@@ -51,6 +51,21 @@ def derive_state(raw, examined_n, unparseable_n, tolerates_unparseable,
     return State.PASS
 
 
+def _worker_count(jobs):
+    """Resolve the ``jobs`` setting to a concrete thread-pool size.
+
+    ``"auto"`` leaves headroom on the machine; an int is an explicit
+    worker count; a float is a fraction of the available CPUs. Every
+    branch floors at 1 so a starved or misconfigured machine still runs.
+    """
+    cpu_n = os.cpu_count() or 1
+    if jobs == "auto":
+        return max(1, cpu_n - 2)
+    if isinstance(jobs, float):
+        return max(1, round(cpu_n * jobs))
+    return max(1, jobs)
+
+
 @dataclass
 class RunReport:
     view: str
@@ -70,7 +85,7 @@ class Runner:
         if self.use_nice:
             os.nice(self.nice)
 
-        workers = max(1, (os.cpu_count() or 1) - 2)
+        workers = _worker_count(self.jobs)
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             pairs = list(pool.map(lambda check: self._run_one(check, ws), checks))
 
