@@ -28,3 +28,14 @@ def run_exit_code_should_return_error_code_when_an_error_is_present():
     code = run_exit_code(results)
 
     assert code == 3
+
+
+from ratch.result import Finding
+
+
+def finding_identity_should_exclude_line_and_count_when_two_findings_differ_only_there():
+    early = Finding(rule_id="r", path="p", anchor="x", line=10, count=3)
+    late = Finding(rule_id="r", path="p", anchor="x", line=99, count=1)
+
+    assert early.identity == late.identity
+    assert early.identity == ("r", "p", "x")

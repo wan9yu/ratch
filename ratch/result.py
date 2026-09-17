@@ -38,6 +38,10 @@ class Finding:
     count: int = 1
     message: str = ""
 
+    @property
+    def identity(self) -> tuple[str, str, str]:
+        return (self.rule_id, self.path, self.anchor)
+
 
 @dataclass(frozen=True)
 class MeasuredValue:
