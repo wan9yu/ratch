@@ -1,5 +1,6 @@
 """Tests for the git-backed Workspace over the worktree/index/HEAD views."""
 
+import os
 import subprocess
 
 from ratch.testing import make_tmp_repo
@@ -147,3 +148,34 @@ def git_grep_should_find_planted_token_with_its_line_number_when_pattern_matches
     hits = ws.git_grep("cl[a]ude")
 
     assert any(path == "hit.py" and line == 2 for path, line, _ in hits)
+
+
+def commit_identity_should_return_head_author_email_when_view_is_head(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"a.py": "X = 1\n"}, user_email="author@example.test")
+
+    ws = Workspace(repo, "HEAD")
+    identity = ws.commit_identity()
+
+    assert identity["email"] == "author@example.test"
+
+
+def commit_identity_should_include_committer_fields_distinct_from_author_when_view_is_head(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.email", "author@example.test"], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "author-dev"], check=True)
+    (repo / "a.py").write_text("X = 1\n")
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    env = dict(os.environ)
+    env["GIT_COMMITTER_NAME"] = "committer-dev"
+    env["GIT_COMMITTER_EMAIL"] = "committer@example.test"
+    subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "seed"], check=True, env=env)
+
+    ws = Workspace(repo, "HEAD")
+    identity = ws.commit_identity()
+
+    assert identity["name"] == "author-dev"
+    assert identity["email"] == "author@example.test"
+    assert identity["committer_name"] == "committer-dev"
+    assert identity["committer_email"] == "committer@example.test"

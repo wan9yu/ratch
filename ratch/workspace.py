@@ -108,3 +108,16 @@ class Workspace:
             path, lineno, text = parts
             hits.append((path, int(lineno), text))
         return hits
+
+    def commit_identity(self):
+        fmt = "%an%x00%ae%x00%cn%x00%ce%x00%s%x00%B"
+        out = self._run_git(["show", "-s", "--format=" + fmt, "HEAD"]).stdout
+        name, email, committer_name, committer_email, subject, body = out.split("\x00", 5)
+        return {
+            "name": name,
+            "email": email,
+            "committer_name": committer_name,
+            "committer_email": committer_email,
+            "subject": subject,
+            "body": body,
+        }
