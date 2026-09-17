@@ -6,6 +6,7 @@ skipped one.
 """
 
 import pathlib
+import subprocess
 
 
 class Workspace:
@@ -18,11 +19,22 @@ class Workspace:
         self._ast_cache = {}
         self._tracked_cache = {}
 
+    def _run_git(self, args, text=True):
+        return subprocess.run(
+            ["git", "-C", str(self.repo_root)] + args,
+            capture_output=True,
+            text=text,
+        )
+
     def read(self, path):
         key = (self.view, path)
         if key in self._read_cache:
             return self._read_cache[key]
-        data = (self.repo_root / path).read_bytes()
+        if self.view == "worktree":
+            data = (self.repo_root / path).read_bytes()
+        else:
+            spec = f":{path}" if self.view == "index" else f"HEAD:{path}"
+            data = self._run_git(["show", spec], text=False).stdout
         text = data.decode("utf-8", errors="replace")
         self._read_cache[key] = text
         return text
