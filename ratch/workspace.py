@@ -143,3 +143,20 @@ class Workspace:
 
     def now(self):
         return datetime.date.today()
+
+    def tmp_tree(self):
+        dest = pathlib.Path(tempfile.mkdtemp(prefix="ratch-tree-"))
+        if self.view == "worktree":
+            for path in self._run_git(["ls-files", "-z"]).stdout.split("\x00"):
+                if not path:
+                    continue
+                target = dest / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((self.repo_root / path).read_bytes())
+        elif self.view == "index":
+            self._run_git(["checkout-index", "-a", "--prefix=" + str(dest) + "/"])
+        else:
+            archive = self._run_git(["archive", "HEAD"], text=False).stdout
+            with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
+                tar.extractall(dest)
+        return dest

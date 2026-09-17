@@ -215,3 +215,35 @@ def now_should_return_todays_date_when_called(tmp_path):
     today = ws.now()
 
     assert today == datetime.date.today()
+
+
+def tmp_tree_should_materialize_committed_content_when_view_is_head(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"pkg/a.py": "COMMITTED = 1\n"})
+    (repo / "pkg" / "a.py").write_text("WORKTREE = 2\n")
+
+    ws = Workspace(repo, "HEAD")
+    dest = ws.tmp_tree()
+
+    assert (pathlib.Path(dest) / "pkg" / "a.py").read_text() == "COMMITTED = 1\n"
+
+
+def tmp_tree_should_materialize_worktree_content_when_view_is_worktree(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"pkg/a.py": "COMMITTED = 1\n"})
+    (repo / "pkg" / "a.py").write_text("WORKTREE = 2\n")
+
+    ws = Workspace(repo, "worktree")
+    dest = ws.tmp_tree()
+
+    assert (pathlib.Path(dest) / "pkg" / "a.py").read_text() == "WORKTREE = 2\n"
+
+
+def tmp_tree_should_materialize_staged_content_when_view_is_index(tmp_path):
+    repo = make_tmp_repo(tmp_path, {"pkg/a.py": "COMMITTED = 1\n"})
+    (repo / "pkg" / "a.py").write_text("INDEX = 2\n")
+    subprocess.run(["git", "-C", str(repo), "add", "pkg/a.py"], check=True)
+    (repo / "pkg" / "a.py").write_text("WORKTREE = 3\n")
+
+    ws = Workspace(repo, "index")
+    dest = ws.tmp_tree()
+
+    assert (pathlib.Path(dest) / "pkg" / "a.py").read_text() == "INDEX = 2\n"
