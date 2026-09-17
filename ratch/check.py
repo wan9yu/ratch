@@ -9,9 +9,17 @@ engine decoupled.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
 from ratch.result import Result
+
+
+@dataclass(frozen=True)
+class Plant:
+    label: str
+    planted_ws: Workspace
+    expected: tuple[str, str, str]
 
 
 @runtime_checkable
