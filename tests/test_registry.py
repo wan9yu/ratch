@@ -29,3 +29,57 @@ def load_manifest_should_return_manifest_checks_when_a_manifest_module_exists(tm
     checks = load_manifest(tmp_path)
 
     assert checks == ["from-manifest-sentinel"]
+
+
+def the_example_manifest_should_gate_on_the_forbidden_literal_check():
+    import importlib.util
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location(
+        "example_manifest", root / "examples" / "ratch_checks.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    assert len(module.CHECKS) == 1
+    assert isinstance(module.CHECKS[0], NoForbiddenLiteral)
+
+
+def the_pre_commit_hook_should_invoke_the_staged_gate():
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    banned = "cl" + "aude"
+    text = (root / "hooks" / "pre-commit").read_text()
+
+    body = [line for line in text.splitlines() if line.strip()]
+
+    assert body[0].startswith("#!")
+    assert "python3 -m ratch check --staged" in text
+    assert banned not in text
+
+
+def the_readme_should_declare_what_ratch_never_gates():
+    import pathlib
+
+    root = pathlib.Path(__file__).resolve().parent.parent
+    banned = "cl" + "aude"
+    text = (root / "README.md").read_text()
+
+    for phrase in ("naming quality", "abstraction quality",
+                   "prose quality", "test meaningfulness"):
+        assert phrase in text
+
+    assert banned not in text
+    padded = f" {text.lower()} "
+    assert not any(f" {pronoun} " in padded for pronoun in ("i", "we", "our", "my"))
+
+
+def the_package_docstring_should_state_the_single_source_of_truth_decision():
+    import ratch
+
+    doc = ratch.__doc__ or ""
+
+    assert "SSOT" in doc
+    assert "copied fact rots" in doc

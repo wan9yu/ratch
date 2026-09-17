@@ -1,0 +1,3 @@
+#!/bin/sh
+# ratch gate: block a commit that trips a Tier A check
+exec python3 -m ratch check --staged
