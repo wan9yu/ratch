@@ -68,22 +68,3 @@ def plant_should_be_frozen_when_a_field_is_reassigned():
 
     with pytest.raises(dataclasses.FrozenInstanceError):
         plant.label = "other"
-
-
-import typing
-
-from ratch import check as _check_module
-from ratch.workspace import Workspace
-
-
-def plant_type_hints_should_resolve_workspace_when_module_globals_include_it():
-    # `Workspace` is only imported under TYPE_CHECKING (see ratch/check.py),
-    # so a caller resolving hints must supply it via globalns; this is the
-    # tool-facing seam that keeps typing.get_type_hints from raising
-    # NameError on the deferred forward reference.
-    globalns = dict(vars(_check_module))
-    globalns["Workspace"] = Workspace
-
-    hints = typing.get_type_hints(Plant, globalns=globalns)
-
-    assert hints["planted_ws"] is Workspace

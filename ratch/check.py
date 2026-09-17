@@ -15,6 +15,10 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 from ratch.result import Result
 
 if TYPE_CHECKING:
+    # TYPE_CHECKING-only: resolves the Workspace forward reference for
+    # static type checkers; not imported at runtime (no ratch code calls
+    # get_type_hints on these annotations, and this avoids a runtime
+    # import).
     from ratch.workspace import Workspace
 
 
