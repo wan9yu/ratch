@@ -1,3 +1,5 @@
+import pytest
+
 from ratch.checks.forbidden_literal import NoForbiddenLiteral
 from ratch.registry import discover, load_manifest
 
@@ -13,6 +15,11 @@ def load_manifest_should_return_the_default_check_when_no_manifest_exists(tmp_pa
 
     assert len(checks) == 1
     assert isinstance(checks[0], NoForbiddenLiteral)
+
+
+def no_forbidden_literal_should_raise_when_min_surface_is_zero():
+    with pytest.raises(ValueError):
+        NoForbiddenLiteral(min_surface=0)
 
 
 def load_manifest_should_return_manifest_checks_when_a_manifest_module_exists(tmp_path):
