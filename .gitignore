@@ -1,0 +1,26 @@
+# Internal working notes — design briefs, survey output, decision logs. Never shipped.
+internal/
+
+# Subagent-driven-development scratch (ledger, briefs, review packages).
+.superpowers/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
