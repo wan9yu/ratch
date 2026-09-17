@@ -6,8 +6,12 @@ skipped one.
 """
 
 import ast as _ast
+import datetime
+import io
 import pathlib
 import subprocess
+import tarfile
+import tempfile
 
 
 class Workspace:
@@ -81,3 +85,26 @@ class Workspace:
             tree = None
         self._ast_cache[key] = tree
         return tree
+
+    def git_grep(self, pattern, cached=False, head=False):
+        args = ["grep", "-n", "-z", "-I", "-E"]
+        if cached:
+            args.append("--cached")
+        args += ["-e", pattern]
+        if head:
+            args.append("HEAD")
+        proc = self._run_git(args)
+        if proc.returncode not in (0, 1):
+            raise RuntimeError(proc.stderr)
+        hits = []
+        for record in proc.stdout.split("\n"):
+            if not record:
+                continue
+            # `git grep -n -z` emits `path\x00lineno\x00text` (both separators
+            # are NUL), not `path\x00lineno:text`. Split on NUL, not ":".
+            parts = record.split("\x00", 2)
+            if len(parts) != 3:
+                continue
+            path, lineno, text = parts
+            hits.append((path, int(lineno), text))
+        return hits

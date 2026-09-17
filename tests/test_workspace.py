@@ -137,3 +137,13 @@ def ast_should_return_none_and_count_once_when_source_has_syntax_error(tmp_path)
     assert first is None
     assert second is None
     assert ws.unparseable_n == 1
+
+
+def git_grep_should_find_planted_token_with_its_line_number_when_pattern_matches(tmp_path):
+    token = "cl" + "aude"
+    repo = make_tmp_repo(tmp_path, {"hit.py": "a = 1\nbad = '" + token + "'\n"})
+
+    ws = Workspace(repo, "worktree")
+    hits = ws.git_grep("cl[a]ude")
+
+    assert any(path == "hit.py" and line == 2 for path, line, _ in hits)
