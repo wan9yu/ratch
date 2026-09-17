@@ -24,13 +24,8 @@ def no_forbidden_literal_should_raise_when_min_surface_is_zero():
 
 def load_manifest_should_return_manifest_checks_when_a_manifest_module_exists(tmp_path):
     manifest = tmp_path / "ratch_checks.py"
-    manifest.write_text(
-        "from ratch.checks.forbidden_literal import NoForbiddenLiteral\n"
-        "CHECKS = [NoForbiddenLiteral()]\n",
-        encoding="utf-8",
-    )
+    manifest.write_text('CHECKS = ["from-manifest-sentinel"]\n', encoding="utf-8")
 
     checks = load_manifest(tmp_path)
 
-    assert len(checks) == 1
-    assert isinstance(checks[0], NoForbiddenLiteral)
+    assert checks == ["from-manifest-sentinel"]
