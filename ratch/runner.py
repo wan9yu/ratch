@@ -6,6 +6,20 @@ gate can never let a run exit clean, and resolves the run to the exit
 code of the most severe state present. A crashing check never aborts
 the run: its exception becomes an ERROR result for that check alone,
 and every other check still runs to completion.
+
+Decision: no asyncio; the Runner schedules checks on a bounded
+ThreadPoolExecutor. Rejected: asyncio (it would color every check and
+its paired self-tests, forcing the non-stdlib pytest-asyncio, and an
+async memo cache dies with pytest's per-test event loop) and a default
+ProcessPool (a memoized Workspace does not cross process boundaries).
+Because: the proven corpus has zero async specimens; the concurrency
+here is I/O-bound subprocess work that threads cover, while pure-CPU
+scans stay on ~one core under the GIL, leaving the machine headroom.
+
+Decision: the run-level exit code is the code of the highest-precedence
+state present (ERROR > FAIL > VACUOUS > PASS), never a numeric max.
+Because: FAIL (a real violation) must outrank VACUOUS even though
+VACUOUS's exit code (2) is numerically higher than FAIL's (1).
 """
 import concurrent.futures
 import os

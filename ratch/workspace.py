@@ -3,6 +3,14 @@
 Reads never mutate the repository; the counters accumulate what a scan
 declined to examine so a check can distinguish an empty surface from a
 skipped one.
+
+Decision: a synchronous facade is the sole I/O boundary; a check pulls
+what it needs from an injected Workspace. Rejected: an async Workspace
+(would color every check) and preloading values into the check (would
+forbid subprocess/reflective checks). Because: purity lives in the
+fixture (the FakeWorkspace twin), not in the check signature —
+mirroring the corpus's injected-Clock discipline, so a subprocess/
+behavioral check can exist while its self-tests stay deterministic.
 """
 
 import ast as _ast
