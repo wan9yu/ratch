@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ratch"
+version = "0.1.0"
+description = "The ratchet only turns one way: code is the single source of truth."
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+ratch = "ratch.cli:main"
+
+[project.entry-points."ratch.checks"]
+no-forbidden-literal = "ratch.checks.forbidden_literal:NoForbiddenLiteral"
+
+[tool.setuptools.packages.find]
+include = ["ratch*"]
+
+# REQUIRED: pytest's default `python_functions` is `test*`, which does NOT collect
+# BDD-named `*_should_*` functions. Without this block every "watch it pass" step
+# silently collects nothing (exit 5, "no tests ran") — the plan cannot be executed.
+[tool.pytest.ini_options]
+python_functions = ["*_should_*"]
+testpaths = ["tests"]
