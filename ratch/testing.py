@@ -83,3 +83,47 @@ class FakeWorkspace:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(text)
         return root
+
+
+def make_tmp_repo(tmp_path, files, user_email="dev@example.test"):
+    """Materialize ``files`` into a fresh committed git repo, return its path."""
+    repo = pathlib.Path(tmp_path)
+    repo.mkdir(parents=True, exist_ok=True)
+
+    def git(*args):
+        subprocess.run(["git", *args], cwd=repo, check=True,
+                        capture_output=True, text=True)
+
+    git("init", "-q")
+    git("config", "user.email", user_email)
+    git("config", "user.name", "ratch-dev")
+    for path, text in files.items():
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
+    git("add", "-A")
+    git("commit", "-q", "-m", "seed")
+    return repo
+
+
+def assert_bites(check, kit):
+    """Assert a check FAILs each planted violation and PASSes its clean fixture."""
+    clean = check.fixture(kit)
+    plants = list(check.plants(clean))
+    if not plants:
+        raise AssertionError(f"{check.id}: plants() yielded nothing to bite")
+    for plant in plants:
+        bitten = check.check(plant.planted_ws)
+        if bitten.state is not State.FAIL:
+            raise AssertionError(
+                f"{check.id}: plant {plant.label!r} did not FAIL "
+                f"(got {bitten.state})")
+        identities = {finding.identity for finding in bitten.findings}
+        if plant.expected not in identities:
+            raise AssertionError(
+                f"{check.id}: plant {plant.label!r} missing finding "
+                f"{plant.expected}")
+    clean_result = check.check(clean)
+    if clean_result.state is not State.PASS:
+        raise AssertionError(
+            f"{check.id}: fixture was not clean (got {clean_result.state})")
