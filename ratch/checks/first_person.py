@@ -48,9 +48,15 @@ class NoFirstPerson:
         self.polarity = polarity
         self.paths = tuple(paths)
         self.min_surface = min_surface
-        self.tokens_en = tuple(tokens_en)
+        # allow-team-we: drop the collective EN pronouns (keep only "I"),
+        # and let the CJK builder exempt 我们.
+        if polarity == "allow-team-we":
+            self.tokens_en = tuple(t for t in tokens_en if t == "I")
+        else:
+            self.tokens_en = tuple(tokens_en)
         self.tokens_cjk = tuple(tokens_cjk)
         self._en_rx = self._build_en_rx()
+        self._cjk_rx = self._build_cjk_rx()
 
     def _build_en_rx(self):
         if not self.tokens_en:
@@ -63,6 +69,17 @@ class NoFirstPerson:
                  else f"[{t[0].upper()}{t[0]}]{re.escape(t[1:])}"
                  for t in self.tokens_en]
         return re.compile(r"\b(?:" + "|".join(parts) + r")\b")
+
+    def _build_cjk_rx(self):
+        if not self.tokens_cjk:
+            return None
+        parts = []
+        for t in self.tokens_cjk:
+            if t == "我" and self.polarity == "allow-team-we":
+                parts.append("我(?!们)")  # allow the collective 我们
+            else:
+                parts.append(re.escape(t))
+        return re.compile("|".join(parts))
 
     def _state(self, findings, examined_n):
         if findings:
@@ -79,7 +96,8 @@ class NoFirstPerson:
         for path in files:
             examined_n += 1
             for lineno, line in enumerate(ws.read(path).splitlines(), start=1):
-                if self._en_rx and self._en_rx.search(line):
+                if (self._en_rx and self._en_rx.search(line)) or \
+                   (self._cjk_rx and self._cjk_rx.search(line)):
                     anchor = " ".join(line.split())
                     findings.append(
                         Finding(self.id, path, anchor, line=lineno,

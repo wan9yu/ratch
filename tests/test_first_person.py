@@ -76,3 +76,32 @@ def no_first_person_should_pass_when_prose_says_us_as_an_uppercase_acronym():
     ws = FakeWorkspace(files={"doc.md": "The US-ASCII encoding is fine.\n"})
     result = NoFirstPerson().check(ws)
     assert result.state is State.PASS
+
+
+def no_first_person_should_fail_when_a_prose_line_contains_cjk_self():
+    ws = FakeWorkspace(files={"doc.md": "这是我的计划。\n"})
+    result = NoFirstPerson().check(ws)
+    assert result.state is State.FAIL
+    assert any(
+        f.identity == ("no-first-person", "doc.md", "这是我的计划。")
+        for f in result.findings
+    )
+
+
+def no_first_person_should_pass_on_team_we_cjk_when_polarity_allows_it():
+    ws = FakeWorkspace(files={"doc.md": "这是我们的计划。\n"})
+    result = NoFirstPerson(polarity="allow-team-we").check(ws)
+    assert result.state is State.PASS
+    assert result.findings == []
+
+
+def no_first_person_should_still_fail_when_bare_cjk_self_appears_under_allow_team_we():
+    ws = FakeWorkspace(files={"doc.md": "我做的。\n"})
+    result = NoFirstPerson(polarity="allow-team-we").check(ws)
+    assert result.state is State.FAIL
+
+
+def no_first_person_should_pass_when_english_we_appears_under_allow_team_we():
+    ws = FakeWorkspace(files={"doc.md": "Here we shipped it.\n"})
+    result = NoFirstPerson(polarity="allow-team-we").check(ws)
+    assert result.state is State.PASS
