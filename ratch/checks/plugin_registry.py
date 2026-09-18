@@ -33,10 +33,6 @@ def _min_surface_of(cls):
 
 def _instantiate(cls):
     try:
-        return cls()
-    except TypeError:
-        pass
-    try:
         params = inspect.signature(cls.__init__).parameters
     except (TypeError, ValueError):
         return None
@@ -48,7 +44,9 @@ def _instantiate(cls):
     ]
     if required == ["package"]:
         return cls(package="_ratch_registry_probe")
-    return None
+    if required:
+        return None
+    return cls()
 
 
 def _ban_check(owner, ws):
@@ -203,6 +201,67 @@ class _Toothless:
         return FakeWorkspace(files={"clean.py": "x = 1\n"})
 
 
+class _NoFixture:
+    """A tooth that exposes no fixture method.
+
+    Rule:
+        Tracked files may not contain the token BAN.
+    Why:
+        The registry meta-check must refuse a plugin with no fixture.
+    Proven in:
+        this repository
+    Not this:
+        Not a project rule; a plant double only.
+    """
+
+    id = "no-fixture"
+    tier = "A"
+    kind = "gate"
+    scope = "global"
+    proven_in = ("this repository",)
+    confidence = "breadth"
+    tolerates_unparseable = False
+    min_surface = 1
+
+    def check(self, ws):
+        return _ban_check(self, ws)
+
+    def plants(self, ws):
+        yield from _ban_plants(self, ws)
+
+
+class _BrokenBite:
+    """A tooth that never FAILs its plants.
+
+    Rule:
+        Tracked files may not contain the token BAN.
+    Why:
+        The registry meta-check must refuse a plugin whose plants do not bite.
+    Proven in:
+        this repository
+    Not this:
+        Not a project rule; a plant double only.
+    """
+
+    id = "broken-bite"
+    tier = "A"
+    kind = "gate"
+    scope = "global"
+    proven_in = ("this repository",)
+    confidence = "breadth"
+    tolerates_unparseable = False
+    min_surface = 1
+
+    def check(self, ws):
+        return Result(self.id, State.PASS, examined_n=1)
+
+    def plants(self, ws):
+        yield from _ban_plants(self, ws)
+
+    def fixture(self, kit):
+        return _ban_fixture(self, kit)
+
+
 class PluginRegistry:
     """Refuse a registered plugin that does not carry the check contract.
 
@@ -275,16 +334,23 @@ class PluginRegistry:
             )
         if findings:
             return findings
-        inst = _instantiate(cls)
+        try:
+            inst = _instantiate(cls)
+        except Exception:
+            findings.append(
+                Finding(self.id, name, "construct",
+                        message=f"{name}: construct")
+            )
+            return findings
         if inst is None:
             findings.append(
-                Finding(self.id, name, "assert_bites",
+                Finding(self.id, name, "construct",
                         message=f"{name}: unconstructable")
             )
             return findings
         try:
             assert_bites(inst, None)
-        except AssertionError:
+        except Exception:
             findings.append(
                 Finding(self.id, name, "assert_bites",
                         message=f"{name}: assert_bites")
@@ -331,6 +397,24 @@ class PluginRegistry:
             label="plants",
             planted_ws=toothless,  # type: ignore[arg-type]
             expected=(self.id, "toothless", "plants"),
+        )
+        no_fixture = FakeWorkspace(
+            files={"ok.py": "x = 1\n"},
+            plugin_classes={"no-fixture": _NoFixture},
+        )
+        yield Plant(
+            label="fixture",
+            planted_ws=no_fixture,  # type: ignore[arg-type]
+            expected=(self.id, "no-fixture", "fixture"),
+        )
+        broken_bite = FakeWorkspace(
+            files={"ok.py": "x = 1\n"},
+            plugin_classes={"broken-bite": _BrokenBite},
+        )
+        yield Plant(
+            label="assert_bites",
+            planted_ws=broken_bite,  # type: ignore[arg-type]
+            expected=(self.id, "broken-bite", "assert_bites"),
         )
 
     def fixture(self, kit):

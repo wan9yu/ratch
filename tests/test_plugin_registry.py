@@ -47,6 +47,30 @@ def plugin_registry_should_fail_when_a_plugin_exposes_no_plants():
     )
 
 
+def plugin_registry_should_fail_when_a_plugin_exposes_no_fixture():
+    from ratch.checks.plugin_registry import _NoFixture
+
+    result = PluginRegistry().check(_ws({"no-fixture": _NoFixture}))
+
+    assert result.state is State.FAIL
+    assert any(
+        finding.identity == ("plugin-registry", "no-fixture", "fixture")
+        for finding in result.findings
+    )
+
+
+def plugin_registry_should_fail_when_a_plugin_does_not_bite_its_plants():
+    from ratch.checks.plugin_registry import _BrokenBite
+
+    result = PluginRegistry().check(_ws({"broken-bite": _BrokenBite}))
+
+    assert result.state is State.FAIL
+    assert any(
+        finding.identity == ("plugin-registry", "broken-bite", "assert_bites")
+        for finding in result.findings
+    )
+
+
 def plugin_registry_should_pass_when_a_plugin_carries_the_full_contract():
     from ratch.checks.plugin_registry import _CleanTooth
 
