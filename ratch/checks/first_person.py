@@ -55,8 +55,14 @@ class NoFirstPerson:
     def _build_en_rx(self):
         if not self.tokens_en:
             return None
-        parts = [re.escape(t) for t in self.tokens_en]
-        return re.compile(r"\b(?:" + "|".join(parts) + r")\b", re.IGNORECASE)
+        # Self-host critical (blocking, non-weakenable gate): "I" never matches
+        # inside the I/O boundary term, and NO re.IGNORECASE — IGNORECASE would
+        # bite a lowercase loop variable `i`, `i.e.`, or the acronym `US`.
+        # Match only sentence-case forms: I, We/we, Our/our, Us/us.
+        parts = ["I(?!/O)" if t == "I"
+                 else f"[{t[0].upper()}{t[0]}]{re.escape(t[1:])}"
+                 for t in self.tokens_en]
+        return re.compile(r"\b(?:" + "|".join(parts) + r")\b")
 
     def _state(self, findings, examined_n):
         if findings:

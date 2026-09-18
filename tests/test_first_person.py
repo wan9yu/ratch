@@ -51,3 +51,28 @@ def no_first_person_should_be_vacuous_when_no_prose_file_is_in_scope():
     ws = FakeWorkspace(files={"src/mod.py": "we = 1  # code, not prose\n"})
     result = NoFirstPerson().check(ws)
     assert result.state is State.VACUOUS
+
+
+def no_first_person_should_pass_when_a_prose_line_says_i_slash_o():
+    ws = FakeWorkspace(files={"doc.md": "The I/O boundary is the sole seam.\n"})
+    result = NoFirstPerson().check(ws)
+    assert result.state is State.PASS
+    assert result.findings == []
+
+
+def no_first_person_should_pass_when_prose_uses_a_lowercase_i_as_a_variable():
+    ws = FakeWorkspace(files={"doc.md": "The loop uses i as its counter.\n"})
+    result = NoFirstPerson().check(ws)
+    assert result.state is State.PASS
+
+
+def no_first_person_should_pass_when_prose_says_i_e():
+    ws = FakeWorkspace(files={"doc.md": "Use the gate, i.e. the blocking check.\n"})
+    result = NoFirstPerson().check(ws)
+    assert result.state is State.PASS
+
+
+def no_first_person_should_pass_when_prose_says_us_as_an_uppercase_acronym():
+    ws = FakeWorkspace(files={"doc.md": "The US-ASCII encoding is fine.\n"})
+    result = NoFirstPerson().check(ws)
+    assert result.state is State.PASS
