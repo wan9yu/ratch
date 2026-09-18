@@ -24,3 +24,19 @@ def circular_import_should_fail_when_package_imports_itself_cyclically(tmp_path)
     assert result.state is State.FAIL
     assert result.findings[0].path == "cyc_pkg"
     assert "circular import" in result.findings[0].anchor
+
+
+def clean_package_should_pass_when_no_cycle_present(tmp_path):
+    ws = _pkg(tmp_path, "clean_pkg", {"__init__.py": "value = 7\n"})
+    result = NoCircularImport("clean_pkg").check(ws)
+    assert result.state is State.PASS
+    assert result.examined_n == 1
+
+
+def missing_dependency_should_error_when_package_import_raises_modulenotfound(tmp_path):
+    ws = _pkg(tmp_path, "needy_pkg", {
+        "__init__.py": "import totally_absent_dep_xyz\n",
+    })
+    result = NoCircularImport("needy_pkg").check(ws)
+    assert result.state is State.ERROR
+    assert not result.findings
