@@ -18,6 +18,7 @@ ratch = "ratch.cli:main"
 no-forbidden-literal = "ratch.checks.forbidden_literal:NoForbiddenLiteral"
 no-first-person = "ratch.checks.first_person:NoFirstPerson"
 no-ai-signatures = "ratch.checks.ai_signatures:NoAiSignatures"
+no-circular-import = "ratch.checks.circular_import:NoCircularImport"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]

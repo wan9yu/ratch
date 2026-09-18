@@ -1,9 +1,13 @@
 """No-circular-import check."""
 from __future__ import annotations
 
+import pathlib
 import sys
+import tempfile
 
+from ratch.check import Plant
 from ratch.result import Finding, Result, State
+from ratch.workspace import Workspace
 
 _CYCLE_SIGNATURES = ("partially initialized module", "circular import")
 
@@ -27,6 +31,14 @@ def _cycle_line(stderr):
         if any(sig in line for sig in _CYCLE_SIGNATURES):
             return _strip_trailing_path(line)
     return lines[-1] if lines else ""
+
+
+def _write_package(root, name, modules):
+    pkg = pathlib.Path(root) / name
+    pkg.mkdir(parents=True, exist_ok=True)
+    for mod_name, text in modules.items():
+        (pkg / mod_name).write_text(text)
+    return pkg
 
 
 class NoCircularImport:
@@ -79,3 +91,29 @@ class NoCircularImport:
                                   message=f"circular import: {anchor}")],
             )
         return Result(self.id, State.ERROR, examined_n=0)
+
+    def plants(self, ws):
+        root = pathlib.Path(tempfile.mkdtemp(prefix="ratch-circ-"))
+        _write_package(root, self.package, {
+            "__init__.py": f"from {self.package} import a\n",
+            "a.py": f"from {self.package}.b import beta\n\nalpha = 1\n",
+            "b.py": f"from {self.package}.a import alpha\n\nbeta = 2\n",
+        })
+        planted = Workspace(root)
+        probe = NoCircularImport(self.package, interpreter=self.interpreter)
+        probed = probe.check(planted)
+        if probed.state is not State.FAIL or not probed.findings:
+            raise AssertionError(
+                f"{self.id}: probe could not reproduce the planted cycle "
+                f"(got {probed.state})")
+        finding = probed.findings[0]
+        yield Plant(
+            label=f"circular:{self.package}",
+            planted_ws=planted,
+            expected=(self.id, self.package, finding.anchor),
+        )
+
+    def fixture(self, kit):
+        root = pathlib.Path(tempfile.mkdtemp(prefix="ratch-circ-clean-"))
+        _write_package(root, self.package, {"__init__.py": "value = 42\n"})
+        return Workspace(root)

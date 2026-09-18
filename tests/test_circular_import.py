@@ -3,6 +3,7 @@ import pathlib
 
 from ratch.checks.circular_import import NoCircularImport
 from ratch.result import State
+from ratch.testing import assert_bites
 from ratch.workspace import Workspace
 
 
@@ -40,3 +41,8 @@ def missing_dependency_should_error_when_package_import_raises_modulenotfound(tm
     result = NoCircularImport("needy_pkg").check(ws)
     assert result.state is State.ERROR
     assert not result.findings
+
+
+def no_circular_import_should_bite_its_plants_when_checked_against_its_own_fixture():
+    check = NoCircularImport("ratch_circ_probe")
+    assert_bites(check, kit=None)
