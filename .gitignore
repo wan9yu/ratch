@@ -1,8 +1,7 @@
 # Internal working notes — design briefs, survey output, decision logs. Never shipped.
 internal/
 
-# Subagent-driven-development scratch — the real dir lives under internal/.superpowers
-# (already ignored); a root .superpowers symlink bridges the SDD scripts. Ignore both.
+# Safety net: SDD scratch lives under internal/ only. Never a root copy.
 .superpowers
 
 # Python
