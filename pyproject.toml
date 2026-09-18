@@ -20,6 +20,7 @@ no-first-person = "ratch.checks.first_person:NoFirstPerson"
 no-ai-signatures = "ratch.checks.ai_signatures:NoAiSignatures"
 no-circular-import = "ratch.checks.circular_import:NoCircularImport"
 plugin-registry = "ratch.checks.plugin_registry:PluginRegistry"
+manifest-purity = "ratch.checks.manifest_purity:ManifestPurity"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]

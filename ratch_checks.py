@@ -14,6 +14,9 @@ from ratch.checks.forbidden_literal import NoForbiddenLiteral
 PluginRegistry = importlib.import_module(
     "ratch.checks.plugin_registry"
 ).PluginRegistry
+ManifestPurity = importlib.import_module(
+    "ratch.checks.manifest_purity"
+).ManifestPurity
 
 CHECKS = [
     NoForbiddenLiteral(),
@@ -21,4 +24,5 @@ CHECKS = [
     NoAiSignatures(),
     NoCircularImport(package="ratch"),
     PluginRegistry(),
+    ManifestPurity(),
 ]
