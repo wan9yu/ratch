@@ -44,15 +44,11 @@ class RatchItem(pytest.Item):
 def pytest_collection_modifyitems(session, config, items):
     if not config.getoption("--ratch"):
         return
-    cwd = pathlib.Path.cwd()
-    for check in load_manifest(cwd):
-        items.append(
-            RatchItem.from_parent(session, name=f"ratch:{check.id}", check=check)
-        )
+    checks = list(load_manifest(pathlib.Path.cwd()))
     spec = config.getoption("--ratch-plugin")
     if spec:
-        cls = resolve_plugin(spec)
-        extra = cls()
-        items.append(
-            RatchItem.from_parent(session, name=f"ratch:{extra.id}", check=extra)
-        )
+        checks.append(resolve_plugin(spec)())
+    items.extend(
+        RatchItem.from_parent(session, name=f"ratch:{check.id}", check=check)
+        for check in checks
+    )
