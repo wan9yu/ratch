@@ -105,3 +105,13 @@ def no_first_person_should_pass_when_english_we_appears_under_allow_team_we():
     ws = FakeWorkspace(files={"doc.md": "Here we shipped it.\n"})
     result = NoFirstPerson(polarity="allow-team-we").check(ws)
     assert result.state is State.PASS
+
+
+def no_first_person_should_bite_every_plant_when_checked_against_its_own_fixture(tmp_path):
+    assert_bites(NoFirstPerson(), tmp_path)
+
+
+def no_first_person_should_be_discoverable_when_registered_as_an_entry_point():
+    from ratch.registry import discover
+
+    assert discover().get("no-first-person") is NoFirstPerson

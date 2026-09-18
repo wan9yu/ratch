@@ -108,3 +108,24 @@ class NoFirstPerson:
             examined_n=examined_n, skipped_n=ws.skipped_n,
             unparseable_n=0, findings=findings,
         )
+
+    def plants(self, ws):
+        for glob in self.paths:
+            fname = glob.replace("*", "note")   # e.g. "*.md" -> "note.md"
+            for token in self.tokens_en:
+                line = f"Line with {token} here."
+                yield Plant(
+                    label=f"en:{token}:{glob}",
+                    planted_ws=FakeWorkspace(files={fname: line + "\n"}),
+                    expected=(self.id, fname, line),
+                )
+            for token in self.tokens_cjk:
+                line = f"这一行有{token}字。"
+                yield Plant(
+                    label=f"cjk:{token}:{glob}",
+                    planted_ws=FakeWorkspace(files={fname: line + "\n"}),
+                    expected=(self.id, fname, line),
+                )
+
+    def fixture(self, kit):
+        return FakeWorkspace(files={"README.md": "The ratchet turns one way.\n"})
