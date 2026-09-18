@@ -72,6 +72,7 @@ class NoCircularImport:
     proven_in = ("this repository",)
     confidence = "portable-with-config"
     tolerates_unparseable = False
+    min_surface = 1
 
     def __init__(self, package, interpreter=None):
         self.package = package

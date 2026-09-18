@@ -114,7 +114,11 @@ class Workspace:
             if len(parts) != 3:
                 continue
             path, lineno, text = parts
-            hits.append((path, int(lineno), text))
+            try:
+                lineno_n = int(lineno)
+            except ValueError:
+                continue
+            hits.append((path, lineno_n, text))
         return hits
 
     def commit_identity(self):
@@ -149,6 +153,15 @@ class Workspace:
             text=True,
         )
 
+    def plugin_classes(self):
+        """Installed ratch.checks entry points as a name-to-class mapping."""
+        cached = getattr(self, "_plugin_classes_cache", None)
+        if cached is None:
+            from ratch.registry import discover
+            cached = discover()
+            self._plugin_classes_cache = cached
+        return dict(cached)
+
     def now(self):
         return datetime.date.today()
 
@@ -166,5 +179,10 @@ class Workspace:
         else:
             archive = self._run_git(["archive", "HEAD"], text=False).stdout
             with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
-                tar.extractall(dest)
+                dest_root = dest.resolve()
+                for member in tar.getmembers():
+                    target = (dest / member.name).resolve()
+                    if target != dest_root and dest_root not in target.parents:
+                        raise RuntimeError("unsafe archive path " + member.name)
+                    tar.extract(member, dest)
         return dest

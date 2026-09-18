@@ -29,7 +29,7 @@ class FakeWorkspace:
     """A Workspace-shaped view backed by an in-memory ``{path: text}`` dict."""
 
     def __init__(self, files, view="worktree", run_table=None, git_log_text="",
-                 identity=None, today=None):
+                 identity=None, today=None, plugin_classes=None):
         self.files = dict(files)
         self.view = view
         self.run_table = dict(run_table or {})
@@ -38,6 +38,7 @@ class FakeWorkspace:
         self._today = today or datetime.date.today()
         self.skipped_n = 0
         self.unparseable_n = 0
+        self._plugin_classes = dict(plugin_classes or {})
 
     def tracked_files(self, glob=None):
         paths = sorted(self.files)
@@ -75,6 +76,9 @@ class FakeWorkspace:
 
     def run(self, argv, cwd=None, env=None):
         return self.run_table[tuple(argv)]
+
+    def plugin_classes(self):
+        return dict(self._plugin_classes)
 
     def tmp_tree(self):
         root = pathlib.Path(tempfile.mkdtemp())

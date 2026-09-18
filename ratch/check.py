@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class Plant:
     label: str
-    planted_ws: Workspace
+    planted_ws: object
     expected: tuple[str, str, str]
 
 
