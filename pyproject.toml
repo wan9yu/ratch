@@ -14,6 +14,9 @@ dev = ["pytest"]
 [project.scripts]
 ratch = "ratch.cli:main"
 
+[project.entry-points.pytest11]
+ratch = "ratch.pytest_plugin"
+
 [project.entry-points."ratch.checks"]
 no-forbidden-literal = "ratch.checks.forbidden_literal:NoForbiddenLiteral"
 no-first-person = "ratch.checks.first_person:NoFirstPerson"
