@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import re
+from subprocess import CompletedProcess
 
+from ratch.check import Plant
 from ratch.result import Finding, Result, State
+from ratch.testing import FakeWorkspace
 
 
 def _log_text(commits):
@@ -93,4 +96,30 @@ class NoAiSignatures:
             self.id, self._state(findings, examined_n),
             examined_n=examined_n, skipped_n=ws.skipped_n,
             unparseable_n=0, findings=findings,
+        )
+
+    def plants(self, ws):
+        sha = "0f1e2d3c4b5a6978"
+        bot = "".join(["c", "l", "a", "u", "d", "e"])  # vendor token, never typed whole
+        body = f"feat: thing\n\nCo-Authored-By: {bot} <{bot}-bot@example.test>\n"
+        planted = FakeWorkspace(
+            files={"ok.py": "x = 1\n"},
+            run_table={("git", "rev-parse", "--is-shallow-repository"):
+                       CompletedProcess([], 0, stdout="false\n")},
+            git_log_text=_log_text([(sha, "Dev", "dev@example.test",
+                                     "Dev", "dev@example.test", body)]),
+        )
+        yield Plant(
+            label="commit:co-authored-by",
+            planted_ws=planted,  # type: ignore[arg-type]
+            expected=(self.id, "<commit>", f"{sha[:9]}:Co-Authored-By:"),
+        )
+
+    def fixture(self, kit):
+        return FakeWorkspace(
+            files={"clean.py": "x = 1\n"},
+            run_table={("git", "rev-parse", "--is-shallow-repository"):
+                       CompletedProcess([], 0, stdout="false\n")},
+            git_log_text=_log_text([("feedface12345678", "Dev", "dev@example.test",
+                                     "Dev", "dev@example.test", "feat: initial\n")]),
         )
