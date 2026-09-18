@@ -42,7 +42,13 @@ class NoAiSignatures:
     confidence = "breadth"
     tolerates_unparseable = False
 
-    def __init__(self, patterns=(r"Co-Authored-By:",), min_surface=1):
+    def __init__(self, patterns=(
+        r"Co-Authored-By:",
+        r"Generated with",
+        r"Assisted by",
+        "\N{ROBOT FACE}",
+        r"[\w.+-]+@users\.noreply\.[\w.]+",
+    ), min_surface=1):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.patterns = tuple(patterns)

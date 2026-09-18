@@ -33,3 +33,22 @@ def no_ai_signatures_should_fail_when_a_co_author_trailer_is_in_history():
         f.identity == ("no-ai-signatures", "<commit>", f"{sha[:9]}:Co-Authored-By:")
         for f in result.findings
     )
+
+
+def no_ai_signatures_should_fail_when_a_robot_emoji_appears_in_an_author_name():
+    sha = "9f8e7d6c5b4a3210"
+    robot = "\N{ROBOT FACE}"
+    ws = FakeWorkspace(
+        files={"ok.py": "x = 1\n"},
+        run_table=_not_shallow(),
+        git_log_text=_log((sha, f"{robot} agent", "a@example.test",
+                           "Dev", "d@example.test", "chore: tick\n")),
+    )
+
+    result = NoAiSignatures().check(ws)
+
+    assert result.state is State.FAIL
+    assert any(
+        f.identity == ("no-ai-signatures", "<commit>", f"{sha[:9]}:{robot}")
+        for f in result.findings
+    )
