@@ -3,8 +3,6 @@
 list and describe render the installed catalog from entry points.
 Only check builds a Workspace and a Runner (and may request nicing).
 """
-from __future__ import annotations
-
 import argparse
 import inspect
 import pathlib
@@ -27,19 +25,14 @@ def cmd_list(cwd):
     return 0
 
 
-def cmd_describe(check_id, err=None):
-    err = sys.stderr if err is None else err
+def cmd_describe(check_id):
     cls = discover().get(check_id)
     if cls is None:
-        print(check_id, file=err)
+        print(check_id, file=sys.stderr)
         return 1
-    doc = inspect.getdoc(cls) or ""
-    print(doc)
-    params = [
-        param for name, param in inspect.signature(cls.__init__).parameters.items()
-        if name != "self"
-    ]
-    print(str(inspect.Signature(params)))
+    print(inspect.getdoc(cls) or "")
+    params = list(inspect.signature(cls.__init__).parameters.values())[1:]
+    print(inspect.Signature(params))
     return 0
 
 

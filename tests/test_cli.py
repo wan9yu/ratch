@@ -59,10 +59,11 @@ def main_should_describe_a_plugin_when_the_id_is_known(monkeypatch, capsys):
 
     niced = []
     monkeypatch.setattr(os, "nice", lambda n: niced.append(n))
-    monkeypatch.setattr(
-        cli_mod, "Workspace",
-        lambda *a, **k: (_ for _ in ()).throw(AssertionError("Workspace")),
-    )
+
+    def boom(*_a, **_k):
+        raise AssertionError("Workspace")
+
+    monkeypatch.setattr(cli_mod, "Workspace", boom)
 
     code = main(["describe", "no-forbidden-literal"])
     out = capsys.readouterr().out
