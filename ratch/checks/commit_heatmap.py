@@ -8,6 +8,24 @@ from ratch.testing import FakeWorkspace
 _MAX_COMMITS = 500
 
 
+def _hour_counts(text):
+    hours = [0] * 24
+    n = 0
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            ts = int(line)
+        except ValueError:
+            continue
+        hours[datetime.fromtimestamp(ts).hour] += 1
+        n += 1
+        if n >= _MAX_COMMITS:
+            break
+    return hours, n
+
+
 class CommitHeatmap:
     """Report the busiest hour-of-day in recent git history.
 
@@ -43,23 +61,10 @@ class CommitHeatmap:
         self.min_surface = min_surface
 
     def check(self, ws):
-        hours = [0] * 24
-        n = 0
-        for line in ws.git_log(fmt="%at").splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                ts = int(line)
-            except ValueError:
-                continue
-            hours[datetime.fromtimestamp(ts).hour] += 1
-            n += 1
-            if n >= _MAX_COMMITS:
-                break
+        hours, n = _hour_counts(ws.git_log(fmt="%at"))
         if n < self.min_surface:
             return Result(self.id, State.VACUOUS, examined_n=n, findings=[])
-        peak_hour = max(range(24), key=lambda h: hours[h])
+        peak_hour = max(range(24), key=lambda hour: hours[hour])
         measured = MeasuredValue(
             value=f"{peak_hour}h:{hours[peak_hour]}/{n}",
             state=MState.MEASURED,

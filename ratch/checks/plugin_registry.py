@@ -348,15 +348,14 @@ class PluginRegistry:
                         message=f"{name}: unconstructable")
             )
             return findings
-        if getattr(cls, "kind", "gate") == "eye":
-            return findings
-        try:
-            assert_bites(inst, None)
-        except Exception:
-            findings.append(
-                Finding(self.id, name, "assert_bites",
-                        message=f"{name}: assert_bites")
-            )
+        if getattr(cls, "kind", "gate") != "eye":
+            try:
+                assert_bites(inst, None)
+            except Exception:
+                findings.append(
+                    Finding(self.id, name, "assert_bites",
+                            message=f"{name}: assert_bites")
+                )
         return findings
 
     def check(self, ws):

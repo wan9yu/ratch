@@ -42,15 +42,12 @@ class CatalogSize:
             value=n, state=MState.MEASURED,
             source="plugin_classes", measured_at=ws.now(),
         )
-        examined_n = n if n else 0
-        if examined_n < self.min_surface:
+        if n < self.min_surface:
             state = State.VACUOUS
         else:
             state = State.PASS
-            examined_n = n
         return Result(
-            self.id, state, examined_n=examined_n, findings=[],
-            measured=measured,
+            self.id, state, examined_n=n, findings=[], measured=measured,
         )
 
     def plants(self, ws):
