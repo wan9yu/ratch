@@ -3,9 +3,7 @@ import importlib
 from ratch.result import State
 from ratch.testing import FakeWorkspace, assert_bites
 
-NoHashNamedTest = importlib.import_module(
-    "ratch.checks.hash_named_test"
-).NoHashNamedTest
+NoHashNamedTest = importlib.import_module("ratch.checks.hash_named_test").NoHashNamedTest
 
 
 def no_hash_named_test_should_fail_when_a_test_stem_ends_in_hex():

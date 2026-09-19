@@ -8,14 +8,9 @@ from ratch.testing import FakeWorkspace
 _CDNS = (
     "fonts.googleapis.com",
     "fonts.gstatic.com",
-    "use.typekit.net",
     "typekit.net",
 )
 _WEB = (".html", ".css", ".js")
-
-
-def _is_web(path):
-    return path.endswith(_WEB)
 
 
 class NoExternalFontCdn:
@@ -60,7 +55,7 @@ class NoExternalFontCdn:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if not _is_web(path):
+            if not path.endswith(_WEB):
                 continue
             examined_n += 1
             text = ws.read(path)

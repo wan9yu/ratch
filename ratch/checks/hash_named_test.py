@@ -12,10 +12,7 @@ _HEX_STEM = re.compile(r"_[a-f0-9]{6,8}$")
 
 
 def _stem(path):
-    name = path.rsplit("/", 1)[-1]
-    if name.endswith(".py"):
-        name = name[:-3]
-    return name
+    return path.rsplit("/", 1)[-1].removesuffix(".py")
 
 
 class NoHashNamedTest:

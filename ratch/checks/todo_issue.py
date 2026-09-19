@@ -16,8 +16,8 @@ class TodoHasIssueRef:
     """Require an issue citation on debt markers.
 
     Rule:
-        Every debt-marker word on a tracked line must also carry an
-        issue ref of the form (#N).
+        A tracked line that contains a debt-marker word must also
+        carry an issue ref of the form (#N).
 
     Why:
         An unmarked debt item has no owner and no ticket; a machine
@@ -69,8 +69,7 @@ class TodoHasIssueRef:
         )
 
     def plants(self, ws):
-        marker = "TO" + "DO"
-        line = marker + " fix this"
+        line = _MARKERS[0] + " fix this"
         yield Plant(
             label="debt-unreferenced",
             planted_ws=FakeWorkspace(files={"a.py": line + "\n"}),
@@ -78,5 +77,4 @@ class TodoHasIssueRef:
         )
 
     def fixture(self, kit):
-        marker = "TO" + "DO"
-        return FakeWorkspace(files={"a.py": marker + " fix this (#12)\n"})
+        return FakeWorkspace(files={"a.py": _MARKERS[0] + " fix this (#12)\n"})
