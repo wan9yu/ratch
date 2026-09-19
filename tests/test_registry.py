@@ -31,7 +31,7 @@ def load_manifest_should_return_manifest_checks_when_a_manifest_module_exists(tm
     assert checks == ["from-manifest-sentinel"]
 
 
-def the_example_manifest_should_gate_on_the_forbidden_literal_check():
+def the_example_manifest_should_gate_on_the_forbidden_literal_check_when_read_from_examples():
     import importlib.util
     import pathlib
 
@@ -39,6 +39,8 @@ def the_example_manifest_should_gate_on_the_forbidden_literal_check():
     spec = importlib.util.spec_from_file_location(
         "example_manifest", root / "examples" / "ratch_checks.py"
     )
+    if spec is None or spec.loader is None:
+        raise AssertionError("could not load example manifest")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
@@ -46,7 +48,7 @@ def the_example_manifest_should_gate_on_the_forbidden_literal_check():
     assert isinstance(module.CHECKS[0], NoForbiddenLiteral)
 
 
-def the_pre_commit_hook_should_invoke_the_staged_gate():
+def the_pre_commit_hook_should_invoke_the_staged_gate_when_the_hook_file_is_read():
     import pathlib
 
     root = pathlib.Path(__file__).resolve().parent.parent
@@ -60,7 +62,7 @@ def the_pre_commit_hook_should_invoke_the_staged_gate():
     assert banned not in text
 
 
-def the_readme_should_declare_what_ratch_never_gates():
+def the_readme_should_declare_what_ratch_never_gates_when_the_authored_fence_is_present():
     import pathlib
 
     root = pathlib.Path(__file__).resolve().parent.parent
@@ -76,7 +78,7 @@ def the_readme_should_declare_what_ratch_never_gates():
     assert not any(f" {pronoun} " in padded for pronoun in ("i", "we", "our", "my"))
 
 
-def the_package_docstring_should_state_the_single_source_of_truth_decision():
+def the_package_docstring_should_state_the_single_source_of_truth_decision_when_ratch_is_imported():
     import ratch
 
     doc = ratch.__doc__ or ""

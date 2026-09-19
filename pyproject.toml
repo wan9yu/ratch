@@ -24,6 +24,9 @@ no-ai-signatures = "ratch.checks.ai_signatures:NoAiSignatures"
 no-circular-import = "ratch.checks.circular_import:NoCircularImport"
 plugin-registry = "ratch.checks.plugin_registry:PluginRegistry"
 manifest-purity = "ratch.checks.manifest_purity:ManifestPurity"
+no-conflict-markers = "ratch.checks.conflict_markers:NoConflictMarkers"
+no-vacuous-assert = "ratch.checks.vacuous_assert:NoVacuousAssert"
+bdd-test-conventions = "ratch.checks.bdd_conventions:BddTestConventions"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]

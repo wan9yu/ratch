@@ -17,6 +17,15 @@ PluginRegistry = importlib.import_module(
 ManifestPurity = importlib.import_module(
     "ratch.checks.manifest_purity"
 ).ManifestPurity
+NoConflictMarkers = importlib.import_module(
+    "ratch.checks.conflict_markers"
+).NoConflictMarkers
+NoVacuousAssert = importlib.import_module(
+    "ratch.checks.vacuous_assert"
+).NoVacuousAssert
+BddTestConventions = importlib.import_module(
+    "ratch.checks.bdd_conventions"
+).BddTestConventions
 
 CHECKS = [
     NoForbiddenLiteral(),
@@ -25,4 +34,7 @@ CHECKS = [
     NoCircularImport(package="ratch"),
     PluginRegistry(),
     ManifestPurity(),
+    NoConflictMarkers(),
+    NoVacuousAssert(),
+    BddTestConventions(),
 ]
