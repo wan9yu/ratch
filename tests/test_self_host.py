@@ -1,6 +1,6 @@
 """The ratch repo dogfoods every tooth it ships.
 
-load_manifest read at this repo's own root must return the thirteen ids in
+load_manifest read at this repo's own root must return the fourteen ids in
 ratch_checks.py CHECKS, not the single-check default a fresh repo falls
 back to. no-external-font-cdn is shipped as an entry point only.
 """
@@ -11,7 +11,7 @@ from ratch.registry import load_manifest
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
-def load_manifest_should_return_all_thirteen_teeth_when_read_from_the_ratch_repo_root():
+def load_manifest_should_return_all_fourteen_teeth_when_read_from_the_ratch_repo_root():
     checks = load_manifest(REPO_ROOT)
 
     ids = {check.id for check in checks}
@@ -29,4 +29,5 @@ def load_manifest_should_return_all_thirteen_teeth_when_read_from_the_ratch_repo
         "no-hash-named-test",
         "todo-has-issue-ref",
         "doc-counts-match-ssot",
+        "docs-equal-fresh-render",
     }

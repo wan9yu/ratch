@@ -38,6 +38,9 @@ TodoHasIssueRef = importlib.import_module(
 DocCountsMatchSSot = importlib.import_module(
     "ratch.checks.doc_counts"
 ).DocCountsMatchSSot
+DocsEqualFreshRender = importlib.import_module(
+    "ratch.checks.docs_render"
+).DocsEqualFreshRender
 
 # no-external-font-cdn is an entry point but omitted here: this repo has
 # no html/css/js, so the tooth would be VACUOUS (exit 2).
@@ -55,4 +58,5 @@ CHECKS = [
     NoHashNamedTest(),
     TodoHasIssueRef(),
     DocCountsMatchSSot(),
+    DocsEqualFreshRender(),
 ]
