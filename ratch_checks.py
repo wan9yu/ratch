@@ -26,7 +26,15 @@ NoVacuousAssert = importlib.import_module(
 BddTestConventions = importlib.import_module(
     "ratch.checks.bdd_conventions"
 ).BddTestConventions
-
+NoPytestSkip = importlib.import_module(
+    "ratch.checks.pytest_skip"
+).NoPytestSkip
+NoHashNamedTest = importlib.import_module(
+    "ratch.checks.hash_named_test"
+).NoHashNamedTest
+TodoHasIssueRef = importlib.import_module(
+    "ratch.checks.todo_issue"
+).TodoHasIssueRef
 CHECKS = [
     NoForbiddenLiteral(),
     NoFirstPerson(),
@@ -37,4 +45,7 @@ CHECKS = [
     NoConflictMarkers(),
     NoVacuousAssert(),
     BddTestConventions(),
+    NoPytestSkip(),
+    NoHashNamedTest(),
+    TodoHasIssueRef(),
 ]

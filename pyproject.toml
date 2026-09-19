@@ -27,6 +27,10 @@ manifest-purity = "ratch.checks.manifest_purity:ManifestPurity"
 no-conflict-markers = "ratch.checks.conflict_markers:NoConflictMarkers"
 no-vacuous-assert = "ratch.checks.vacuous_assert:NoVacuousAssert"
 bdd-test-conventions = "ratch.checks.bdd_conventions:BddTestConventions"
+no-pytest-skip = "ratch.checks.pytest_skip:NoPytestSkip"
+no-hash-named-test = "ratch.checks.hash_named_test:NoHashNamedTest"
+todo-has-issue-ref = "ratch.checks.todo_issue:TodoHasIssueRef"
+no-external-font-cdn = "ratch.checks.font_cdn:NoExternalFontCdn"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]
