@@ -35,6 +35,9 @@ NoHashNamedTest = importlib.import_module(
 TodoHasIssueRef = importlib.import_module(
     "ratch.checks.todo_issue"
 ).TodoHasIssueRef
+DocCountsMatchSSot = importlib.import_module(
+    "ratch.checks.doc_counts"
+).DocCountsMatchSSot
 
 # no-external-font-cdn is an entry point but omitted here: this repo has
 # no html/css/js, so the tooth would be VACUOUS (exit 2).
@@ -51,4 +54,5 @@ CHECKS = [
     NoPytestSkip(),
     NoHashNamedTest(),
     TodoHasIssueRef(),
+    DocCountsMatchSSot(),
 ]

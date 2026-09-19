@@ -31,6 +31,7 @@ no-pytest-skip = "ratch.checks.pytest_skip:NoPytestSkip"
 no-hash-named-test = "ratch.checks.hash_named_test:NoHashNamedTest"
 todo-has-issue-ref = "ratch.checks.todo_issue:TodoHasIssueRef"
 no-external-font-cdn = "ratch.checks.font_cdn:NoExternalFontCdn"
+doc-counts-match-ssot = "ratch.checks.doc_counts:DocCountsMatchSSot"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]
