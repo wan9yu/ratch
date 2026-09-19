@@ -18,6 +18,22 @@ def bdd_test_conventions_should_fail_when_a_test_uses_the_test_prefix():
     )
 
 
+def bdd_test_conventions_should_fail_when_a_name_has_a_disjunction_segment():
+    ws = FakeWorkspace(
+        files={"tests/t.py": "def foo_should_pass_or_fail_when_x():\n    pass\n"}
+    )
+    result = BddTestConventions().check(ws)
+    assert result.state is State.FAIL
+    assert any(
+        f.identity == (
+            "bdd-test-conventions",
+            "tests/t.py",
+            "foo_should_pass_or_fail_when_x",
+        )
+        for f in result.findings
+    )
+
+
 def bdd_test_conventions_should_fail_when_a_name_lacks_when():
     ws = FakeWorkspace(files={"tests/t.py": "def foo_should_bar():\n    pass\n"})
     result = BddTestConventions().check(ws)
@@ -50,14 +66,13 @@ def bdd_test_conventions_should_bite_its_plants_when_checked_against_its_own_fix
 
 
 def bdd_test_conventions_should_pass_when_def_appears_inside_a_string():
-    src = (
-        'DOC = """\n'
-        "def test_foo():\n"
-        "    pass\n"
-        '"""\n'
-        "def foo_should_bar_when_baz():\n"
-        "    pass\n"
-    )
+    src = '''DOC = """
+def test_foo():
+    pass
+"""
+def foo_should_bar_when_baz():
+    pass
+'''
     ws = FakeWorkspace(files={"tests/t.py": src})
     result = BddTestConventions().check(ws)
     assert result.state is State.PASS

@@ -9,13 +9,21 @@ from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
 
+def _is_bdd_name(name):
+    if name.startswith("test_"):
+        return False
+    if "_should_" not in name or "_when_" not in name:
+        return False
+    return "or" not in name.split("_")
+
+
 class BddTestConventions:
     """Require BDD test names in tracked test modules.
 
     Rule:
         In tracked tests/*.py, every top-level def whose name does not
-        start with underscore must contain _should_ and _when_, and must
-        not start with test_.
+        start with underscore must contain _should_ and _when_, must not
+        start with test_, and must not use or as a snake_case segment.
 
     Why:
         A test name that reads as a sentence is the readable spec; a
@@ -26,8 +34,9 @@ class BddTestConventions:
         this repository
 
     Not this:
-        Not a requirement on private helpers. Not a change to pytest
-        python_functions.
+        Not a requirement on private helpers. Not a ban on tokens that
+        merely contain the letters o-r (error, format). Not a change to
+        pytest python_functions.
     """
 
     id = "bdd-test-conventions"
@@ -66,11 +75,7 @@ class BddTestConventions:
                 name = node.name
                 if name.startswith("_"):
                     continue
-                if (
-                    name.startswith("test_")
-                    or "_should_" not in name
-                    or "_when_" not in name
-                ):
+                if not _is_bdd_name(name):
                     findings.append(
                         Finding(self.id, path, name,
                                 message=f"bdd name: {name}")
@@ -88,6 +93,13 @@ class BddTestConventions:
                 files={"tests/t.py": "def test_foo():\n    pass\n"}
             ),
             expected=(self.id, "tests/t.py", "test_foo"),
+        )
+        yield Plant(
+            label="or-segment",
+            planted_ws=FakeWorkspace(
+                files={"tests/t.py": "def foo_should_pass_or_fail_when_x():\n    pass\n"}
+            ),
+            expected=(self.id, "tests/t.py", "foo_should_pass_or_fail_when_x"),
         )
 
     def fixture(self, kit):
