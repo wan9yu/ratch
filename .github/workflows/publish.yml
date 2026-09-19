@@ -29,3 +29,18 @@ jobs:
       - run: pip install build
       - run: python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
+  github-release:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME"
+          --title "$GITHUB_REF_NAME"
+          --generate-notes
