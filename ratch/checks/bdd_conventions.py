@@ -1,19 +1,12 @@
 """BDD test-naming check."""
 from __future__ import annotations
 
-import re
+import ast
 
 from ratch.check import Plant
+from ratch.checks import is_test_py
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
-
-_DEF = re.compile(r"^def (\w+)\(", re.M)
-
-
-def _is_test_py(path):
-    return path.endswith(".py") and (
-        path.startswith("tests/") or "/tests/" in path
-    )
 
 
 class BddTestConventions:
@@ -61,20 +54,31 @@ class BddTestConventions:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if not _is_test_py(path):
+            if not is_test_py(path):
                 continue
             examined_n += 1
-            for name in _DEF.findall(ws.read(path)):
+            tree = ws.ast(path)
+            if tree is None:
+                continue
+            for node in tree.body:
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                name = node.name
                 if name.startswith("_"):
                     continue
-                if name.startswith("test_") or "_should_" not in name or "_when_" not in name:
+                if (
+                    name.startswith("test_")
+                    or "_should_" not in name
+                    or "_when_" not in name
+                ):
                     findings.append(
                         Finding(self.id, path, name,
                                 message=f"bdd name: {name}")
                     )
         return Result(
             self.id, self._state(findings, examined_n),
-            examined_n=examined_n, skipped_n=ws.skipped_n, findings=findings,
+            examined_n=examined_n, skipped_n=ws.skipped_n,
+            unparseable_n=ws.unparseable_n, findings=findings,
         )
 
     def plants(self, ws):

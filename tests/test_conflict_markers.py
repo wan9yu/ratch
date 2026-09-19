@@ -28,3 +28,8 @@ def no_conflict_markers_should_pass_when_markdown_has_a_setext_underline():
 
 def no_conflict_markers_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
     assert_bites(NoConflictMarkers(), tmp_path)
+
+
+def no_conflict_markers_should_be_discoverable_when_registered_as_an_entry_point():
+    from ratch.registry import discover
+    assert discover().get("no-conflict-markers") is NoConflictMarkers

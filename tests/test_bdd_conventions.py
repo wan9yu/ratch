@@ -47,3 +47,22 @@ def bdd_test_conventions_should_pass_when_a_helper_is_private():
 
 def bdd_test_conventions_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
     assert_bites(BddTestConventions(), tmp_path)
+
+
+def bdd_test_conventions_should_pass_when_def_appears_inside_a_string():
+    src = (
+        'DOC = """\n'
+        "def test_foo():\n"
+        "    pass\n"
+        '"""\n'
+        "def foo_should_bar_when_baz():\n"
+        "    pass\n"
+    )
+    ws = FakeWorkspace(files={"tests/t.py": src})
+    result = BddTestConventions().check(ws)
+    assert result.state is State.PASS
+
+
+def bdd_test_conventions_should_be_discoverable_when_registered_as_an_entry_point():
+    from ratch.registry import discover
+    assert discover().get("bdd-test-conventions") is BddTestConventions

@@ -4,16 +4,11 @@ from __future__ import annotations
 import re
 
 from ratch.check import Plant
+from ratch.checks import is_test_py
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
 _RX = re.compile(r"^\s*assert (?:True|False)\s*(?:#.*)?$")
-
-
-def _is_test_py(path):
-    return path.endswith(".py") and (
-        path.startswith("tests/") or "/tests/" in path
-    )
 
 
 class NoVacuousAssert:
@@ -59,7 +54,7 @@ class NoVacuousAssert:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if not _is_test_py(path):
+            if not is_test_py(path):
                 continue
             examined_n += 1
             for line in ws.read(path).splitlines():
