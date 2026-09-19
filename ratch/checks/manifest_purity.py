@@ -76,7 +76,9 @@ class ManifestPurity:
         diffs the manifest across commits is meaningless.
 
     Proven in:
-        this repository
+        This repository's manifest contract: ratch_checks.py is a
+        side-effect-free CHECKS list, imported twice with the same
+        fingerprint.
 
     Not this:
         Not a ban on importlib or on from ratch.checks imports. Not a
@@ -88,7 +90,7 @@ class ManifestPurity:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

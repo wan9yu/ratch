@@ -24,7 +24,8 @@ class TodoHasIssueRef:
         can prove each marker points at a numbered issue.
 
     Proven in:
-        this repository
+        A debt-marker line must carry an issue citation of the form
+        (#N).
 
     Not this:
         Not a requirement to file the issue. Not a style rule on
@@ -35,7 +36,7 @@ class TodoHasIssueRef:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

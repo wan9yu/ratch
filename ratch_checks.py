@@ -47,6 +47,9 @@ CatalogSize = importlib.import_module(
 CommitHeatmap = importlib.import_module(
     "ratch.checks.commit_heatmap"
 ).CommitHeatmap
+NoInternalRefs = importlib.import_module(
+    "ratch.checks.internal_refs"
+).NoInternalRefs
 
 # no-external-font-cdn is an entry point but omitted here: this repo has
 # no html/css/js, so the tooth would be VACUOUS (exit 2).
@@ -67,4 +70,5 @@ CHECKS = [
     DocsEqualFreshRender(),
     CatalogSize(),
     CommitHeatmap(),
+    NoInternalRefs(),
 ]

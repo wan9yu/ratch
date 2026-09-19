@@ -27,7 +27,8 @@ class NoHashNamedTest:
         forgotten; a readable stem stays reviewable.
 
     Proven in:
-        this repository
+        A test filename must not end in underscore plus six to eight
+        hex digits once the SHA is forgotten.
 
     Not this:
         Not a ban on hex elsewhere in the path. Not a check on non-test
@@ -38,7 +39,7 @@ class NoHashNamedTest:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

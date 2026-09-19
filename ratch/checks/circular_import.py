@@ -55,7 +55,8 @@ class NoCircularImport:
         in-process import would be masked by an already-populated sys.modules.
 
     Proven in:
-        this repository
+        A fresh-interpreter import of the package: CPython cycle
+        strings FAIL; any other import error is ERROR, never FAIL.
 
     Not this:
         Not a static import-graph analysis and not a style rule. Only an
@@ -69,7 +70,7 @@ class NoCircularImport:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "portable-with-config"
     tolerates_unparseable = False
     min_surface = 1

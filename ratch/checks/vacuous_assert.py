@@ -24,7 +24,8 @@ class NoVacuousAssert:
         remain allowed.
 
     Proven in:
-        this repository
+        Message-less assert True/False placeholders in tests, leaving
+        assert False, "reason" and assert x is True.
 
     Not this:
         Not a ban on assert False with a reason, nor on assert x is True.
@@ -34,7 +35,7 @@ class NoVacuousAssert:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

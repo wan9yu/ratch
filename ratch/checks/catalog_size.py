@@ -17,7 +17,8 @@ class CatalogSize:
         measures.
 
     Proven in:
-        this repository
+        This repository: an eye that reports how many checks are
+        installed, without failing the run.
 
     Not this:
         Not a gate. VACUOUS on an empty catalog does not fail the run.
@@ -27,7 +28,7 @@ class CatalogSize:
     tier = "A"
     kind = "eye"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

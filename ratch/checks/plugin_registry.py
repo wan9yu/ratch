@@ -87,7 +87,7 @@ class _CleanTooth:
     Why:
         The registry meta-check needs a clean plugin to prove PASS.
     Proven in:
-        this repository
+        this repository's plugin-registry plants
     Not this:
         Not a project rule; a fixture double only.
     """
@@ -96,7 +96,7 @@ class _CleanTooth:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
     min_surface = 1
@@ -117,7 +117,7 @@ class _MissingWhy:
     Rule:
         Tracked files may not contain the token BAN.
     Proven in:
-        this repository
+        this repository's plugin-registry plants
     Not this:
         Not a project rule; a plant double only.
     """
@@ -126,7 +126,7 @@ class _MissingWhy:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
     min_surface = 1
@@ -149,7 +149,7 @@ class _NoMinSurface:
     Why:
         The registry meta-check must refuse a plugin with no floor.
     Proven in:
-        this repository
+        this repository's plugin-registry plants
     Not this:
         Not a project rule; a plant double only.
     """
@@ -158,7 +158,7 @@ class _NoMinSurface:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
 
@@ -180,7 +180,7 @@ class _Toothless:
     Why:
         The registry meta-check must refuse a plugin that cannot bite.
     Proven in:
-        this repository
+        this repository's plugin-registry plants
     Not this:
         Not a project rule; a plant double only.
     """
@@ -189,7 +189,7 @@ class _Toothless:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
     min_surface = 1
@@ -209,7 +209,7 @@ class _NoFixture:
     Why:
         The registry meta-check must refuse a plugin with no fixture.
     Proven in:
-        this repository
+        this repository's plugin-registry plants
     Not this:
         Not a project rule; a plant double only.
     """
@@ -218,7 +218,7 @@ class _NoFixture:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
     min_surface = 1
@@ -238,7 +238,7 @@ class _BrokenBite:
     Why:
         The registry meta-check must refuse a plugin whose plants do not bite.
     Proven in:
-        this repository
+        this repository's plugin-registry plants
     Not this:
         Not a project rule; a plant double only.
     """
@@ -247,7 +247,7 @@ class _BrokenBite:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
     min_surface = 1
@@ -276,8 +276,8 @@ class PluginRegistry:
         meta-check makes the authoring contract a blocking tooth.
 
     Proven in:
-        this repository
-        this repository
+        A registry meta-check: four-heading docstring, min_surface,
+        plants, fixture, and assert_bites on gate plugins.
 
     Not this:
         Not a judgment of Why: prose quality. Not the manifest-purity
@@ -290,10 +290,7 @@ class PluginRegistry:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = (
-        "this repository",
-        "this repository",
-    )
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
 

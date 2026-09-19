@@ -31,7 +31,8 @@ class BddTestConventions:
         share one convention.
 
     Proven in:
-        this repository
+        A test name reads as subject_should_outcome_when_condition,
+        with no test_ prefix and no or segment.
 
     Not this:
         Not a requirement on private helpers. Not a ban on tokens that
@@ -43,7 +44,7 @@ class BddTestConventions:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

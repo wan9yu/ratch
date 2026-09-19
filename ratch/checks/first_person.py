@@ -24,7 +24,8 @@ class NoFirstPerson:
         by eye on every commit.
 
     Proven in:
-        this repository
+        A first-person pronoun scan over record prose (markdown and
+        docstrings), with an I/O exemption and optional team-we polarity.
 
     Not this:
         Not a grammar, clarity, or readability rule. It never rewrites
@@ -37,7 +38,7 @@ class NoFirstPerson:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
 

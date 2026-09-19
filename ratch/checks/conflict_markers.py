@@ -22,7 +22,8 @@ class NoConflictMarkers:
         on every commit.
 
     Proven in:
-        this repository
+        Leftover-merge scan: git conflict start and end markers,
+        never Markdown setext underlines.
 
     Not this:
         Not a Markdown rule. A setext underline of equals signs is
@@ -33,7 +34,7 @@ class NoConflictMarkers:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

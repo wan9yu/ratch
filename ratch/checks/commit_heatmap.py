@@ -1,4 +1,4 @@
-"""commit-heatmap eye, lifted from argus-gateway commit_heatmap hour buckets."""
+"""commit-heatmap eye: hour-of-day buckets from git log."""
 from datetime import datetime
 
 from ratch.check import Plant
@@ -36,11 +36,12 @@ class CommitHeatmap:
     Why:
         A commit heatmap is a lens on when the repo actually moves;
         failing the run because Tuesday was quiet would turn a dashboard
-        into a gate. argus-gateway's commit_heatmap is the structure x
-        time tool; this eye keeps only the hour histogram.
+        into a gate. A production heatmap tool used directory x time;
+        this eye keeps only the hour histogram.
 
     Proven in:
-        this repository
+        git log hour-of-day histogram; a production heatmap used
+        directory x time, not shipped here.
 
     Not this:
         Not the ASCII directory heatmap. Not role filters, --exclude, or
@@ -51,7 +52,7 @@ class CommitHeatmap:
     tier = "A"
     kind = "eye"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "depth-once"
     tolerates_unparseable = False
 

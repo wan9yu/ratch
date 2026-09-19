@@ -36,6 +36,7 @@ doc-counts-match-ssot = "ratch.checks.doc_counts:DocCountsMatchSSot"
 docs-equal-fresh-render = "ratch.checks.docs_render:DocsEqualFreshRender"
 catalog-size = "ratch.checks.catalog_size:CatalogSize"
 commit-heatmap = "ratch.checks.commit_heatmap:CommitHeatmap"
+no-internal-refs = "ratch.checks.internal_refs:NoInternalRefs"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]

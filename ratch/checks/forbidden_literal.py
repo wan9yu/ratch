@@ -34,7 +34,9 @@ class NoForbiddenLiteral:
         machine can prove its absence on every commit.
 
     Proven in:
-        this repository
+        A three-vector scan (content, filename, HEAD commit) used in
+        production repositories before this library; the banned token
+        is written with a bracket break so the guard never spells it.
 
     Not this:
         Not a style or taste rule. Naming, wording, and intent are untouched;
@@ -45,7 +47,7 @@ class NoForbiddenLiteral:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
 

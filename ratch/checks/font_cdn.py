@@ -25,7 +25,8 @@ class NoExternalFontCdn:
         must be served from the same origin.
 
     Proven in:
-        this repository
+        Shipped HTML/CSS/JS serves fonts locally, not from a webfont
+        CDN.
 
     Not this:
         Not a ban on local @font-face. Not a scan of markdown prose.
@@ -35,7 +36,7 @@ class NoExternalFontCdn:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

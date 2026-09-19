@@ -35,7 +35,8 @@ class DocCountsMatchSSot:
         added; the entry-point catalog is the SSOT.
 
     Proven in:
-        this repository
+        This repository: README catalog_n equals the live entry-point
+        catalog size from discover().
 
     Not this:
         Not a full README renderer. Not an enabled-set count (that
@@ -47,7 +48,7 @@ class DocCountsMatchSSot:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

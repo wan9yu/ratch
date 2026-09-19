@@ -32,7 +32,8 @@ class NoPytestSkip:
         out loud with pytest.fail instead.
 
     Proven in:
-        this repository
+        Invariant tests must fail out loud, never pytest.skip into a
+        silent green.
 
     Not this:
         Not a ban on pytest.fail or on skipping outside tests/.
@@ -42,7 +43,7 @@ class NoPytestSkip:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

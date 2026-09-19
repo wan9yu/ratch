@@ -28,7 +28,8 @@ class DocsEqualFreshRender:
         renderer is the SSOT.
 
     Proven in:
-        this repository
+        This repository: the generated checks region is byte-equal to
+        a fresh render_checks_region().
 
     Not this:
         Not a rewrite of the authored fence. Not a full README
@@ -39,7 +40,7 @@ class DocsEqualFreshRender:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False
 

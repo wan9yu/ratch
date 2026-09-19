@@ -30,7 +30,9 @@ class NoAiSignatures:
         clean.
 
     Proven in:
-        this repository
+        A full-history scan of attribution trailers (Co-Authored-By,
+        Generated with, Assisted by, robot glyph, noreply addresses);
+        a shallow clone must not read as clean.
 
     Not this:
         Not a judgment on who or what wrote the code. Only fixed attribution
@@ -41,7 +43,7 @@ class NoAiSignatures:
     tier = "A"
     kind = "gate"
     scope = "global"
-    proven_in = ("this repository",)
+    proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
 
