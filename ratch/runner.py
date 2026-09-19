@@ -89,8 +89,12 @@ class Runner:
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             pairs = list(pool.map(lambda check: self._run_one(check, ws), checks))
 
-        results = {check_id: result for check_id, result in pairs}
-        exit_code = run_exit_code(results.values())
+        results = {check.id: result for check, result in pairs}
+        gates = [
+            result for check, result in pairs
+            if getattr(check, "kind", "gate") != "eye"
+        ]
+        exit_code = run_exit_code(gates)
         return RunReport(view=ws.view, results=results, exit_code=exit_code)
 
     def _run_one(self, check, ws):
@@ -111,4 +115,4 @@ class Runner:
             r.state, r.examined_n, r.unparseable_n, check.tolerates_unparseable,
             r.findings, min_surface, False, skipped_n=r.skipped_n,
         )
-        return check.id, r
+        return check, r

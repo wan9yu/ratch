@@ -12,7 +12,12 @@ __all__ = ["render_text"]
 def render_text(report):
     lines = []
     for check_id, result in report.results.items():
-        lines.append(f"{check_id}: {result.state.name}")
+        if result.measured is not None:
+            lines.append(
+                f"{check_id}: {result.state.name} {result.measured.value}"
+            )
+        else:
+            lines.append(f"{check_id}: {result.state.name}")
         if result.state is State.FAIL:
             for finding in result.findings:
                 if finding.line is not None:

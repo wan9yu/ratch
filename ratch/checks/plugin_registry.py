@@ -267,8 +267,8 @@ class PluginRegistry:
 
     Rule:
         Every plugin in the workspace catalog must carry a four-heading
-        docstring, a min_surface of at least 1, plants and fixture
-        methods, and a passing assert_bites proof.
+        docstring, a min_surface of at least 1, and plants and fixture
+        methods. Gate plugins must also pass assert_bites; eyes do not.
 
     Why:
         A registered plugin with no plants, no floor, or no headings is a
@@ -347,6 +347,8 @@ class PluginRegistry:
                 Finding(self.id, name, "construct",
                         message=f"{name}: unconstructable")
             )
+            return findings
+        if getattr(cls, "kind", "gate") == "eye":
             return findings
         try:
             assert_bites(inst, None)

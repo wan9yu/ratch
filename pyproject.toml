@@ -33,6 +33,8 @@ todo-has-issue-ref = "ratch.checks.todo_issue:TodoHasIssueRef"
 no-external-font-cdn = "ratch.checks.font_cdn:NoExternalFontCdn"
 doc-counts-match-ssot = "ratch.checks.doc_counts:DocCountsMatchSSot"
 docs-equal-fresh-render = "ratch.checks.docs_render:DocsEqualFreshRender"
+catalog-size = "ratch.checks.catalog_size:CatalogSize"
+commit-heatmap = "ratch.checks.commit_heatmap:CommitHeatmap"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]

@@ -41,6 +41,12 @@ DocCountsMatchSSot = importlib.import_module(
 DocsEqualFreshRender = importlib.import_module(
     "ratch.checks.docs_render"
 ).DocsEqualFreshRender
+CatalogSize = importlib.import_module(
+    "ratch.checks.catalog_size"
+).CatalogSize
+CommitHeatmap = importlib.import_module(
+    "ratch.checks.commit_heatmap"
+).CommitHeatmap
 
 # no-external-font-cdn is an entry point but omitted here: this repo has
 # no html/css/js, so the tooth would be VACUOUS (exit 2).
@@ -59,4 +65,6 @@ CHECKS = [
     TodoHasIssueRef(),
     DocCountsMatchSSot(),
     DocsEqualFreshRender(),
+    CatalogSize(),
+    CommitHeatmap(),
 ]
