@@ -1,6 +1,4 @@
 """doc-counts-match-ssot check."""
-from __future__ import annotations
-
 import re
 
 from ratch.check import Plant
@@ -74,17 +72,14 @@ class DocCountsMatchSSot:
     def check(self, ws):
         tracked = set(ws.tracked_files())
         findings = []
-        examined_n = 0
-        seen_paths = []
+        texts = {}
         for pin in self.pins:
             if pin.path not in tracked:
                 continue
-            if pin.path not in seen_paths:
-                seen_paths.append(pin.path)
-                examined_n += 1
-            text = ws.read(pin.path)
+            if pin.path not in texts:
+                texts[pin.path] = ws.read(pin.path)
             matched = False
-            for line in text.splitlines():
+            for line in texts[pin.path].splitlines():
                 hit = pin.pattern.search(line)
                 if hit is None:
                     continue
@@ -100,8 +95,8 @@ class DocCountsMatchSSot:
                             message="catalog_n line missing")
                 )
         return Result(
-            self.id, self._state(findings, examined_n),
-            examined_n=examined_n, skipped_n=ws.skipped_n, findings=findings,
+            self.id, self._state(findings, len(texts)),
+            examined_n=len(texts), skipped_n=ws.skipped_n, findings=findings,
         )
 
     def plants(self, ws):
