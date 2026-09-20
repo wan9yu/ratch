@@ -77,8 +77,10 @@ def the_repository_should_carry_no_forbidden_literal_when_every_tracked_file_is_
 
 def the_ci_workflow_should_deep_checkout_and_run_both_gates_when_read_from_disk():
     root = pathlib.Path(__file__).resolve().parent.parent
-    text = (root / ".github" / "workflows" / "ci.yml").read_text()
+    workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
+    script = (root / "build.sh").read_text()
 
-    assert "fetch-depth: 0" in text
-    assert "pytest" in text
-    assert "python -m ratch check" in text
+    assert "fetch-depth: 0" in workflow
+    assert "./build.sh" in workflow
+    assert "pytest" in script
+    assert "ratch check" in script
