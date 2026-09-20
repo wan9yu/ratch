@@ -37,7 +37,7 @@ python -m ratch describe no-forbidden-literal
 - `no-pytest-skip` — skip 掉却显示绿灯的测试
 - `no-hash-named-test` — 文件名带一段随后没人认得的十六进制
 - `todo-has-issue-ref` — 没有 issue 引用的欠债标记
-- `bdd-test-conventions` — 测试名仍读成一句话，长函数体要空行
+- `bdd-test-conventions` — 测试名读成一句话；两处空行把函数体切成三块
 - `no-circular-import` — 只有一种 import 顺序能装上的包
 - `no-reassurance-words` — 让读者停止核对的安抚腔
 - `loc-cap` — Python 模块超过 1000 行

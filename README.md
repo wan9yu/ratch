@@ -33,7 +33,7 @@ and CI install, run pytest, then `ratch check`.
 - `no-pytest-skip` — skipped tests that read green
 - `no-hash-named-test` — test files named with a forgotten hex suffix
 - `todo-has-issue-ref` — debt markers without an issue citation
-- `bdd-test-conventions` — test names that still read as a sentence, with a blank line in a long body
+- `bdd-test-conventions` — test names that read as a sentence; two blank lines split the body into three blocks
 - `no-circular-import` — a package that only imports in one order
 - `no-reassurance-words` — prose that tells the reader to stop checking
 - `loc-cap` — Python modules over 1000 lines
