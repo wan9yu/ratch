@@ -13,9 +13,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      - run: pip install -e ".[dev]"
-      - run: python -m pytest
-      - run: python -m ratch check
+      - run: ./build.sh
   pypi:
     needs: gate
     runs-on: ubuntu-latest
