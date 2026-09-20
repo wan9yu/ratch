@@ -14,8 +14,14 @@ def render_text(report):
     for check_id, result in report.results.items():
         line = f"{check_id}: {result.state.name}"
         if result.measured is not None:
-            line = f"{line} {result.measured.value}"
-        lines.append(line)
+            value = str(result.measured.value)
+            if "\n" in value:
+                lines.append(line)
+                lines.extend(f"  {row}" for row in value.splitlines())
+            else:
+                lines.append(f"{line} {value}")
+        else:
+            lines.append(line)
         if result.state is State.FAIL:
             for finding in result.findings:
                 if finding.line is not None:

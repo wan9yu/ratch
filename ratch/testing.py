@@ -65,7 +65,7 @@ class FakeWorkspace:
                     hits.append((path, lineno, line))
         return hits
 
-    def git_log(self, rng=None, fmt="%H"):
+    def git_log(self, rng=None, fmt="%H", extra=None):
         return self.git_log_text
 
     def commit_identity(self):

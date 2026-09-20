@@ -138,8 +138,8 @@ class Workspace:
         email = self._run_git(["config", "user.email"]).stdout.strip()
         return {"name": name, "email": email}
 
-    def git_log(self, rng=None, fmt="%H"):
-        args = ["log", "--format=" + fmt]
+    def git_log(self, rng=None, fmt="%H", extra=None):
+        args = ["log", "--format=" + fmt, *(extra or ())]
         if rng is not None:
             args.append(rng)
         return self._run_git(args).stdout
