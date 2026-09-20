@@ -2,8 +2,9 @@ import datetime
 
 import pytest
 
-from ratch.result import State
-from ratch.testing import FakeClock, FakeWorkspace
+from ratch.check import Plant
+from ratch.result import Result, State
+from ratch.testing import FakeClock, FakeWorkspace, assert_bites
 
 
 def fakeclock_should_return_its_fixed_date_when_asked():
@@ -26,11 +27,6 @@ def fakeworkspace_should_answer_from_its_dict_when_queried():
     assert grep == [("a.py", 2, "y = 2")]
 
 
-from ratch.check import Plant
-from ratch.result import Result
-from ratch.testing import assert_bites
-
-
 class _ToothlessCheck:
     id = "toothless"
 
@@ -51,3 +47,5 @@ def assert_bites_should_raise_when_check_lacks_teeth():
 
     with pytest.raises(AssertionError):
         assert_bites(toothless, kit=None)
+
+    assert toothless.id == "toothless"

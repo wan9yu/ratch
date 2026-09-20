@@ -44,10 +44,11 @@ def main_should_list_discovered_plugins_when_invoked_with_list(
     assert niced == []
     assert set(names) == set(discover())
     assert names == sorted(names)
+    width = max([24, *(len(name) for name in names)]) + 1
     labels = {}
     for line in lines:
         name, label = line.split()
-        assert line == f"{name:<24}{label}"
+        assert line == f"{name:<{width}}{label}"
         labels[name] = label
     assert set(labels.values()) <= {"enabled", "catalog"}
     assert labels["no-forbidden-literal"] == "enabled"
@@ -78,6 +79,8 @@ def main_should_describe_a_plugin_when_the_id_is_known(monkeypatch, capsys):
 
 def main_should_return_one_when_the_describe_id_is_unknown(capsys):
     code = main(["describe", "no-such-check"])
+
     err = capsys.readouterr().err
+
     assert code == 1
     assert "no-such-check" in err

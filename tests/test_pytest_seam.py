@@ -54,23 +54,39 @@ def _collect(cwd, extra_args=(), env=None):
 
 
 def resolve_plugin_should_return_the_class_when_spec_is_module_colon_name():
-    cls = resolve_plugin("ratch.checks.forbidden_literal:NoForbiddenLiteral")
-    assert cls is NoForbiddenLiteral
+    cls = resolve_plugin('ratch.checks.forbidden_literal:NoForbiddenLiteral')
+
+    found = cls
+
+    expected = NoForbiddenLiteral
+
+    assert found is expected
 
 
 def resolve_plugin_should_raise_when_spec_has_no_colon():
-    with pytest.raises(ValueError):
+    expected = ValueError
+
+    with pytest.raises(expected):
         resolve_plugin("ratch.checks.forbidden_literal")
+
+    assert expected is ValueError
 
 
 def iter_ratch_check_ids_should_match_the_manifest_when_a_manifest_exists(tmp_path):
-    (tmp_path / "ratch_checks.py").write_text(_ONE_CHECK, encoding="utf-8")
-    assert iter_ratch_check_ids(tmp_path) == ["no-forbidden-literal"]
+    (tmp_path / 'ratch_checks.py').write_text(_ONE_CHECK, encoding='utf-8')
+
+    found = iter_ratch_check_ids(tmp_path)
+
+    expected = ['no-forbidden-literal']
+
+    assert found == expected
 
 
 def pytest_ratch_should_collect_manifest_ids_when_flag_is_on(tmp_path):
     repo = make_tmp_repo(tmp_path / "repo", files={"ok.py": "x = 1\n"})
+
     (repo / "ratch_checks.py").write_text(_ONE_CHECK, encoding="utf-8")
+
     proc = _collect(repo, extra_args=("--ratch",))
     assert proc.returncode == 0
     assert "ratch:no-forbidden-literal" in proc.stdout
@@ -78,18 +94,23 @@ def pytest_ratch_should_collect_manifest_ids_when_flag_is_on(tmp_path):
 
 def pytest_ratch_should_collect_nothing_extra_when_flag_is_off(tmp_path):
     repo = make_tmp_repo(tmp_path / "repo", files={"ok.py": "x = 1\n"})
+
     proc = _collect(repo)
+
     assert "ratch:" not in proc.stdout
 
 
 def pytest_ratch_plugin_should_collect_dotted_path_when_flag_is_set(tmp_path):
     repo = make_tmp_repo(tmp_path / "repo", files={"ok.py": "x = 1\n"})
+
     (repo / "ratch_checks.py").write_text(_ONE_CHECK, encoding="utf-8")
+
     plugin = tmp_path / "plug"
     plugin.mkdir()
     (plugin / "trivial_ratch_plugin.py").write_text(_TRIVIAL_PLUGIN, encoding="utf-8")
     env = dict(os.environ)
     env["PYTHONPATH"] = str(plugin) + os.pathsep + env.get("PYTHONPATH", "")
+
     proc = _collect(
         repo,
         extra_args=("--ratch", "--ratch-plugin=trivial_ratch_plugin:TrivialCheck"),

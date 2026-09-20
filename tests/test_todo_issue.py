@@ -9,7 +9,9 @@ _DEBT = "TO" + "DO"
 
 def todo_has_issue_ref_should_fail_when_a_debt_marker_lacks_a_ticket():
     line = _DEBT + " fix this"
+
     ws = FakeWorkspace(files={"a.py": line + "\n"})
+
     result = TodoHasIssueRef().check(ws)
     assert result.state is State.FAIL
     assert any(
@@ -20,14 +22,23 @@ def todo_has_issue_ref_should_fail_when_a_debt_marker_lacks_a_ticket():
 
 def todo_has_issue_ref_should_pass_when_a_debt_marker_cites_a_ticket():
     ws = FakeWorkspace(files={"a.py": _DEBT + " fix this (#12)\n"})
+
     result = TodoHasIssueRef().check(ws)
+
     assert result.state is State.PASS
 
 
 def todo_has_issue_ref_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
-    assert_bites(TodoHasIssueRef(), tmp_path)
+    check = TodoHasIssueRef()
+
+    assert_bites(check, tmp_path)
+
+    assert check.id
 
 
 def todo_has_issue_ref_should_be_discoverable_when_registered_as_an_entry_point():
     from ratch.registry import discover
-    assert discover().get("todo-has-issue-ref") is TodoHasIssueRef
+
+    catalog = discover()
+
+    assert catalog.get("todo-has-issue-ref") is TodoHasIssueRef

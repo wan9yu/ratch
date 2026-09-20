@@ -7,19 +7,28 @@ from ratch.registry import discover, load_manifest
 def discover_should_resolve_no_forbidden_literal_when_the_package_is_installed():
     loaded = discover()
 
-    assert loaded["no-forbidden-literal"] is NoForbiddenLiteral
+    found = loaded['no-forbidden-literal']
+
+    expected = NoForbiddenLiteral
+
+    assert found is expected
 
 
 def load_manifest_should_return_the_default_check_when_no_manifest_exists(tmp_path):
     checks = load_manifest(tmp_path)
 
     assert len(checks) == 1
+
     assert isinstance(checks[0], NoForbiddenLiteral)
 
 
 def no_forbidden_literal_should_raise_when_min_surface_is_zero():
-    with pytest.raises(ValueError):
+    expected = ValueError
+
+    with pytest.raises(expected):
         NoForbiddenLiteral(min_surface=0)
+
+    assert expected is ValueError
 
 
 def load_manifest_should_return_manifest_checks_when_a_manifest_module_exists(tmp_path):
@@ -32,12 +41,12 @@ def load_manifest_should_return_manifest_checks_when_a_manifest_module_exists(tm
 
 
 def the_example_manifest_should_gate_on_the_forbidden_literal_check_when_read_from_examples():
+    import importlib
     import importlib.util
-    import pathlib
 
-    root = pathlib.Path(__file__).resolve().parent.parent
+    ROOT = importlib.import_module("tests.repo_root").ROOT
     spec = importlib.util.spec_from_file_location(
-        "example_manifest", root / "examples" / "ratch_checks.py"
+        "example_manifest", ROOT / "examples" / "ratch_checks.py"
     )
     if spec is None or spec.loader is None:
         raise AssertionError("could not load example manifest")
@@ -49,11 +58,10 @@ def the_example_manifest_should_gate_on_the_forbidden_literal_check_when_read_fr
 
 
 def the_pre_commit_hook_should_invoke_the_staged_gate_when_the_hook_file_is_read():
-    import pathlib
-
-    root = pathlib.Path(__file__).resolve().parent.parent
+    import importlib
+    ROOT = importlib.import_module("tests.repo_root").ROOT
     banned = "cl" + "aude"
-    text = (root / "hooks" / "pre-commit").read_text()
+    text = (ROOT / "hooks" / "pre-commit").read_text()
 
     body = [line for line in text.splitlines() if line.strip()]
 
@@ -63,11 +71,10 @@ def the_pre_commit_hook_should_invoke_the_staged_gate_when_the_hook_file_is_read
 
 
 def the_readme_should_declare_what_ratch_never_gates_when_the_authored_fence_is_present():
-    import pathlib
-
-    root = pathlib.Path(__file__).resolve().parent.parent
+    import importlib
+    ROOT = importlib.import_module("tests.repo_root").ROOT
     banned = "cl" + "aude"
-    text = (root / "README.md").read_text()
+    text = (ROOT / "README.md").read_text()
 
     for phrase in ("naming quality", "abstraction quality",
                    "prose quality", "test meaningfulness"):
@@ -76,6 +83,8 @@ def the_readme_should_declare_what_ratch_never_gates_when_the_authored_fence_is_
     assert banned not in text
     padded = f" {text.lower()} "
     assert not any(f" {pronoun} " in padded for pronoun in ("i", "we", "our", "my"))
+    for name in discover():
+        assert name in text
 
 
 def the_package_docstring_should_state_the_single_source_of_truth_decision_when_ratch_is_imported():

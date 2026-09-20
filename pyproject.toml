@@ -37,6 +37,12 @@ docs-equal-fresh-render = "ratch.checks.docs_render:DocsEqualFreshRender"
 catalog-size = "ratch.checks.catalog_size:CatalogSize"
 commit-heatmap = "ratch.checks.commit_heatmap:CommitHeatmap"
 no-internal-refs = "ratch.checks.internal_refs:NoInternalRefs"
+no-reassurance-words = "ratch.checks.reassurance:NoReassuranceWords"
+tests-repo-root-ssot = "ratch.checks.repo_root_ssot:RepoRootSSot"
+loc-cap = "ratch.checks.loc_cap:LocCap"
+injected-clock = "ratch.checks.injected_clock:InjectedClock"
+doc-cli-examples-valid = "ratch.checks.doc_cli:DocCliExamplesValid"
+no-autoclose-keywords-in-commits = "ratch.checks.autoclose:NoAutocloseKeywords"
 
 [tool.setuptools.packages.find]
 include = ["ratch*"]

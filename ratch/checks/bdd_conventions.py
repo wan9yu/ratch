@@ -17,6 +17,22 @@ def _is_bdd_name(name):
     return "or" not in name.split("_")
 
 
+def _paragraph_n(node, lines):
+    start = node.lineno
+    end = node.end_lineno or node.lineno
+    body = lines[start:end]
+    groups = 0
+    in_group = False
+    for line in body:
+        if line.strip():
+            if not in_group:
+                groups += 1
+                in_group = True
+        else:
+            in_group = False
+    return groups
+
+
 class BddTestConventions:
     """Require BDD test names in tracked test modules.
 
@@ -24,6 +40,8 @@ class BddTestConventions:
         In tracked tests/*.py, every top-level def whose name does not
         start with underscore must contain _should_ and _when_, must not
         start with test_, and must not use or as a snake_case segment.
+        The body must be three blocks separated by two blank lines.
+        Labels such as given/when/then are allowed and ignored.
 
     Why:
         A test name that reads as a sentence is the readable spec; a
@@ -32,7 +50,8 @@ class BddTestConventions:
 
     Proven in:
         A test name reads as subject_should_outcome_when_condition,
-        with no test_ prefix and no or segment.
+        with no test_ prefix and no or segment. Two blank lines in the
+        body mark three blocks; no given/when/then labels.
 
     Not this:
         Not a requirement on private helpers. Not a ban on tokens that
@@ -70,6 +89,7 @@ class BddTestConventions:
             tree = ws.ast(path)
             if tree is None:
                 continue
+            lines = ws.read(path).splitlines()
             for node in tree.body:
                 if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     continue
@@ -80,6 +100,12 @@ class BddTestConventions:
                     findings.append(
                         Finding(self.id, path, name,
                                 message=f"bdd name: {name}")
+                    )
+                    continue
+                if _paragraph_n(node, lines) < 3:
+                    findings.append(
+                        Finding(self.id, path, name,
+                                message=f"bdd blank: {name}")
                     )
         return Result(
             self.id, self._state(findings, examined_n),
@@ -102,8 +128,21 @@ class BddTestConventions:
             ),
             expected=(self.id, "tests/t.py", "foo_should_pass_or_fail_when_x"),
         )
+        body = "\n".join(f"    a{i} = {i}" for i in range(6))
+        yield Plant(
+            label="dense-body",
+            planted_ws=FakeWorkspace(
+                files={"tests/t.py": f"def foo_should_bar_when_baz():\n{body}\n"}
+            ),
+            expected=(self.id, "tests/t.py", "foo_should_bar_when_baz"),
+        )
 
     def fixture(self, kit):
         return FakeWorkspace(
-            files={"tests/t.py": "def foo_should_bar_when_baz():\n    pass\n"}
+            files={"tests/t.py": (
+                "def foo_should_bar_when_baz():\n"
+                "    x = 1\n\n"
+                "    y = 2\n\n"
+                "    assert x\n"
+            )}
         )

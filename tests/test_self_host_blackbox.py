@@ -60,8 +60,9 @@ def ratch_check_should_exit_zero_when_the_staged_tree_is_clean():
 
 
 def the_repository_should_carry_no_forbidden_literal_when_every_tracked_file_is_scanned():
+    import importlib
     banned = "cl" + "aude"
-    root = pathlib.Path(__file__).resolve().parent.parent
+    root = importlib.import_module("tests.repo_root").ROOT
     listing = subprocess.run(
         ["git", "ls-files"], cwd=root, capture_output=True, text=True, check=True
     )
@@ -76,7 +77,10 @@ def the_repository_should_carry_no_forbidden_literal_when_every_tracked_file_is_
 
 
 def the_ci_workflow_should_deep_checkout_and_run_both_gates_when_read_from_disk():
-    root = pathlib.Path(__file__).resolve().parent.parent
+    import importlib
+
+    root = importlib.import_module("tests.repo_root").ROOT
+
     workflow = (root / ".github" / "workflows" / "ci.yml").read_text()
     script = (root / "build.sh").read_text()
 

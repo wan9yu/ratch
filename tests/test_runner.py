@@ -21,7 +21,9 @@ def derive_state_should_be_vacuous_when_below_min_surface_and_no_findings():
                           tolerates_unparseable=True, findings=[],
                           min_surface=5, has_unexpired_waiver=False)
 
-    assert state is State.VACUOUS
+    expected = State.VACUOUS
+
+    assert state is expected
 
 
 def derive_state_should_be_not_applicable_when_nothing_addressable_and_waiver_unexpired():
@@ -29,7 +31,9 @@ def derive_state_should_be_not_applicable_when_nothing_addressable_and_waiver_un
                           tolerates_unparseable=True, findings=[],
                           min_surface=1, has_unexpired_waiver=True, skipped_n=0)
 
-    assert state is State.NOT_APPLICABLE
+    expected = State.NOT_APPLICABLE
+
+    assert state is expected
 
 
 class _StubCheck:
@@ -104,11 +108,15 @@ def runner_should_mark_error_and_keep_running_other_checks_when_a_check_raises()
 def runner_should_size_workers_to_the_value_when_jobs_is_an_int():
     workers = _worker_count(3)
 
-    assert workers == 3
+    expected = 3
+
+    assert workers == expected
 
 
 def runner_should_size_workers_to_cpu_minus_two_when_jobs_is_auto():
     with mock.patch("ratch.runner.os.cpu_count", return_value=8):
         workers = _worker_count("auto")
 
-    assert workers == 6
+    expected = 6
+
+    assert workers == expected

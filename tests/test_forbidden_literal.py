@@ -61,4 +61,8 @@ def no_forbidden_literal_should_pass_when_the_tree_is_clean():
 
 
 def no_forbidden_literal_should_bite_on_every_plant_when_checked_against_its_own_fixture(tmp_path):
-    assert_bites(NoForbiddenLiteral(), tmp_path)
+    check = NoForbiddenLiteral()
+
+    assert_bites(check, tmp_path)
+
+    assert check.id

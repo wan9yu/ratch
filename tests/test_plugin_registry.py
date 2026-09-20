@@ -84,6 +84,7 @@ def plugin_registry_should_be_vacuous_when_no_plugin_is_registered():
     result = PluginRegistry().check(_ws({}))
 
     assert result.state is State.VACUOUS
+
     assert result.examined_n == 0
 
 
@@ -96,14 +97,23 @@ def plugin_registry_should_pass_when_the_shipped_teeth_are_the_catalog():
     }))
 
     assert result.state is State.PASS
+
     assert result.findings == []
 
 
 def plugin_registry_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
-    assert_bites(PluginRegistry(), tmp_path)
+    check = PluginRegistry()
+
+    assert_bites(check, tmp_path)
+
+    assert check.id
 
 
 def plugin_registry_should_be_discoverable_when_registered_as_an_entry_point():
     from ratch.registry import discover
 
-    assert discover().get("plugin-registry") is PluginRegistry
+    found = discover().get('plugin-registry')
+
+    expected = PluginRegistry
+
+    assert found is expected

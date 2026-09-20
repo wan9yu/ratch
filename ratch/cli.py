@@ -13,15 +13,27 @@ from ratch.reporter import render_text
 from ratch.runner import Runner
 from ratch.workspace import Workspace
 
-__all__ = ["main"]
+__all__ = ["build_parser", "main"]
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(prog="ratch")
+    sub = parser.add_subparsers(dest="command", required=True)
+    check = sub.add_parser("check")
+    check.add_argument("--staged", action="store_true")
+    sub.add_parser("list")
+    describe = sub.add_parser("describe")
+    describe.add_argument("id")
+    return parser
 
 
 def cmd_list(cwd):
     catalog = discover()
     enabled = {check.id for check in load_manifest(cwd)}
+    width = max([24, *(len(name) for name in catalog)]) + 1
     for name in sorted(catalog):
         label = "enabled" if name in enabled else "catalog"
-        print(f"{name:<24}{label}")
+        print(f"{name:<{width}}{label}")
     return 0
 
 
@@ -37,14 +49,7 @@ def cmd_describe(check_id):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog="ratch")
-    sub = parser.add_subparsers(dest="command", required=True)
-    check = sub.add_parser("check")
-    check.add_argument("--staged", action="store_true")
-    sub.add_parser("list")
-    describe = sub.add_parser("describe")
-    describe.add_argument("id")
-    args = parser.parse_args(argv)
+    args = build_parser().parse_args(argv)
 
     cwd = pathlib.Path.cwd()
     if args.command == "list":

@@ -100,4 +100,8 @@ def no_ai_signatures_should_fail_when_trailer_uses_github_lowercase_casing():
 
 
 def no_ai_signatures_should_bite_on_every_plant_when_checked_against_its_own_fixture(tmp_path):
-    assert_bites(NoAiSignatures(), tmp_path)
+    check = NoAiSignatures()
+
+    assert_bites(check, tmp_path)
+
+    assert check.id

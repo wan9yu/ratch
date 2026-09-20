@@ -50,6 +50,24 @@ CommitHeatmap = importlib.import_module(
 NoInternalRefs = importlib.import_module(
     "ratch.checks.internal_refs"
 ).NoInternalRefs
+NoReassuranceWords = importlib.import_module(
+    "ratch.checks.reassurance"
+).NoReassuranceWords
+RepoRootSSot = importlib.import_module(
+    "ratch.checks.repo_root_ssot"
+).RepoRootSSot
+LocCap = importlib.import_module(
+    "ratch.checks.loc_cap"
+).LocCap
+InjectedClock = importlib.import_module(
+    "ratch.checks.injected_clock"
+).InjectedClock
+DocCliExamplesValid = importlib.import_module(
+    "ratch.checks.doc_cli"
+).DocCliExamplesValid
+NoAutocloseKeywords = importlib.import_module(
+    "ratch.checks.autoclose"
+).NoAutocloseKeywords
 
 # no-external-font-cdn is an entry point but omitted here: this repo has
 # no html/css/js, so the tooth would be VACUOUS (exit 2).
@@ -71,4 +89,10 @@ CHECKS = [
     CatalogSize(),
     CommitHeatmap(),
     NoInternalRefs(),
+    NoReassuranceWords(),
+    RepoRootSSot(),
+    LocCap(),
+    InjectedClock(),
+    DocCliExamplesValid(),
+    NoAutocloseKeywords(),
 ]

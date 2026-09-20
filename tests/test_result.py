@@ -1,4 +1,4 @@
-from ratch.result import Result, State, run_exit_code
+from ratch.result import Finding, Result, State, run_exit_code
 
 
 def run_exit_code_should_return_fail_code_when_fail_and_vacuous_both_present():
@@ -15,7 +15,11 @@ def run_exit_code_should_return_fail_code_when_fail_and_vacuous_both_present():
 def run_exit_code_should_return_zero_when_results_are_empty():
     code = run_exit_code([])
 
-    assert code == 0
+    found = code
+
+    expected = 0
+
+    assert found == expected
 
 
 def run_exit_code_should_return_error_code_when_an_error_is_present():
@@ -30,11 +34,9 @@ def run_exit_code_should_return_error_code_when_an_error_is_present():
     assert code == 3
 
 
-from ratch.result import Finding
-
-
 def finding_identity_should_exclude_line_and_count_when_two_findings_differ_only_there():
     early = Finding(rule_id="r", path="p", anchor="x", line=10, count=3)
+
     late = Finding(rule_id="r", path="p", anchor="x", line=99, count=1)
 
     assert early.identity == late.identity

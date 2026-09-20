@@ -12,7 +12,9 @@ _START = "<" * 7
 
 def no_conflict_markers_should_fail_when_a_file_has_a_git_start_marker():
     ws = FakeWorkspace(files={"a.py": _START + " HEAD\nx = 1\n"})
+
     result = NoConflictMarkers().check(ws)
+
     assert result.state is State.FAIL
     assert any(
         f.identity == ("no-conflict-markers", "a.py", _START + " HEAD")
@@ -22,14 +24,25 @@ def no_conflict_markers_should_fail_when_a_file_has_a_git_start_marker():
 
 def no_conflict_markers_should_pass_when_markdown_has_a_setext_underline():
     ws = FakeWorkspace(files={"doc.md": "Title\n=======\n"})
+
     result = NoConflictMarkers().check(ws)
+
     assert result.state is State.PASS
 
 
 def no_conflict_markers_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
-    assert_bites(NoConflictMarkers(), tmp_path)
+    check = NoConflictMarkers()
+
+    assert_bites(check, tmp_path)
+
+    assert check.id
 
 
 def no_conflict_markers_should_be_discoverable_when_registered_as_an_entry_point():
     from ratch.registry import discover
-    assert discover().get("no-conflict-markers") is NoConflictMarkers
+
+    found = discover().get('no-conflict-markers')
+
+    expected = NoConflictMarkers
+
+    assert found is expected

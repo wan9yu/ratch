@@ -1,4 +1,8 @@
-from ratch.check import Check
+import dataclasses
+
+import pytest
+
+from ratch.check import Check, Plant
 from ratch.result import Result, State
 
 
@@ -31,9 +35,9 @@ class _StubCheck:
 
 
 def stub_check_should_satisfy_the_protocol_when_it_exposes_the_full_shape():
-    stub = _StubCheck()
+    candidate: object = _StubCheck()
 
-    conforms = isinstance(stub, Check)
+    conforms = isinstance(candidate, Check)
 
     assert conforms
 
@@ -41,16 +45,10 @@ def stub_check_should_satisfy_the_protocol_when_it_exposes_the_full_shape():
 def stub_check_docstring_should_carry_four_headings_in_order_when_documented():
     doc = _StubCheck.__doc__
 
-    seen = [h for h in ("Rule:", "Why:", "Proven in:", "Not this:") if h in doc]
+    text = doc or ""
+    seen = [h for h in ("Rule:", "Why:", "Proven in:", "Not this:") if h in text]
 
     assert seen == ["Rule:", "Why:", "Proven in:", "Not this:"]
-
-
-import dataclasses
-
-import pytest
-
-from ratch.check import Plant
 
 
 def plant_should_hold_label_workspace_and_expected_identity_when_constructed():
@@ -67,4 +65,6 @@ def plant_should_be_frozen_when_a_field_is_reassigned():
     plant = Plant(label="content", planted_ws=object(), expected=("r", "p", "x"))
 
     with pytest.raises(dataclasses.FrozenInstanceError):
-        plant.label = "other"
+        plant.label = "other"  # type: ignore[misc]
+
+    assert plant.label == "content"
