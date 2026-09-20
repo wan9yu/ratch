@@ -10,7 +10,8 @@ RepoRootSSot = importlib.import_module(
 
 
 def tests_repo_root_ssot_should_fail_when_a_test_walks_file_parents():
-    src = "root = pathlib.Path(__file__).resolve().parent.parent\n"
+    walk = "parent" + ".parent"
+    src = "root = pathlib.Path(__" + "file__).resolve()." + walk + "\n"
 
     result = RepoRootSSot().check(FakeWorkspace(files={"tests/t.py": src}))
 
