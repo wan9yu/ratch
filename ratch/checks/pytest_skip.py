@@ -4,7 +4,7 @@ from __future__ import annotations
 import ast
 
 from ratch.check import Plant
-from ratch.checks import is_test_py
+from ratch.checks import is_test_py, match_globs
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
@@ -25,7 +25,8 @@ class NoPytestSkip:
     """Forbid pytest.skip in invariant tests.
 
     Rule:
-        Tracked tests/*.py must not call pytest.skip.
+        Selected tests must not call pytest.skip. paths=None uses
+        tests/*.py (this repo's default).
 
     Why:
         skip turns a gate into a silent pass; invariants must fail
@@ -47,10 +48,11 @@ class NoPytestSkip:
     confidence = "inferred"
     tolerates_unparseable = False
 
-    def __init__(self, min_surface=1):
+    def __init__(self, min_surface=1, paths=None):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
+        self.paths = None if paths is None else tuple(paths)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -63,7 +65,10 @@ class NoPytestSkip:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if not is_test_py(path):
+            if self.paths is None:
+                if not is_test_py(path):
+                    continue
+            elif not match_globs(path, self.paths):
                 continue
             examined_n += 1
             tree = ws.ast(path)

@@ -5,11 +5,11 @@ import shlex
 from contextlib import redirect_stderr
 
 from ratch.check import Plant
+from ratch.checks import match_globs
 from ratch.cli import build_parser
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
-_TICK = re.compile(r"`(?:python(?:3)?\s+-m\s+)?ratch\s+([^`]+)`")
 _FENCE = re.compile(r"```(?:bash|shell|text)?\n(.*?)```", re.S)
 
 
@@ -17,8 +17,9 @@ class DocCliExamplesValid:
     """Require documented ratch invocations to match argparse.
 
     Rule:
-        Every `ratch …` or `python -m ratch …` example in tracked
-        markdown must parse with the real CLI parser.
+        Every `prog …` or `python -m prog …` example in selected
+        markdown must parse with parser(). Default prog is ratch.
+        paths=None scans every tracked .md (this repo's default).
 
     Why:
         A copied command that argparse would reject is a rotting
@@ -39,10 +40,13 @@ class DocCliExamplesValid:
     confidence = "inferred"
     tolerates_unparseable = False
 
-    def __init__(self, min_surface=1):
+    def __init__(self, min_surface=1, parser=None, prog="ratch", paths=None):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
+        self._parser = parser or build_parser
+        self.prog = prog
+        self.paths = None if paths is None else tuple(paths)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -52,24 +56,34 @@ class DocCliExamplesValid:
         return State.PASS
 
     def check(self, ws):
-        parser = build_parser()
+        parser = self._parser()
+        tick = re.compile(
+            r"`(?:python(?:3)?\s+-m\s+)?"
+            + re.escape(self.prog)
+            + r"\s+([^`]+)`"
+        )
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
             if not path.endswith(".md"):
                 continue
+            if not match_globs(path, self.paths):
+                continue
             examined_n += 1
             text = ws.read(path)
-            snippets = [m.group(1).strip() for m in _TICK.finditer(text)]
+            snippets = [m.group(1).strip() for m in tick.finditer(text)]
+            prefix = self.prog + " "
+            py_prefix = "python -m " + prefix
+            py3_prefix = "python3 -m " + prefix
             for block in _FENCE.findall(text):
                 for line in block.splitlines():
                     line = line.strip().lstrip("$").strip()
-                    if line.startswith("python -m ratch "):
-                        snippets.append(line[len("python -m ratch "):])
-                    elif line.startswith("python3 -m ratch "):
-                        snippets.append(line[len("python3 -m ratch "):])
-                    elif line.startswith("ratch "):
-                        snippets.append(line[len("ratch "):])
+                    if line.startswith(py_prefix):
+                        snippets.append(line[len(py_prefix):])
+                    elif line.startswith(py3_prefix):
+                        snippets.append(line[len(py3_prefix):])
+                    elif line.startswith(prefix):
+                        snippets.append(line[len(prefix):])
             for rest in snippets:
                 try:
                     argv = shlex.split(rest)

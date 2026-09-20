@@ -50,3 +50,14 @@ def no_pytest_skip_should_be_discoverable_when_registered_as_an_entry_point():
     expected = NoPytestSkip
 
     assert found is expected
+
+
+def no_pytest_skip_should_ignore_e2e_when_paths_selects_invariants():
+    ws = FakeWorkspace(files={
+        "tests/e2e/t.py": "import pytest\npytest.skip('x')\n",
+        "tests/invariants/t.py": "assert True is False, 'x'\n",
+    })
+
+    result = NoPytestSkip(paths=("tests/invariants/**/*.py",)).check(ws)
+
+    assert result.state is State.PASS

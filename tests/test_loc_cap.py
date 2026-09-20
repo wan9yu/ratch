@@ -37,3 +37,21 @@ def loc_cap_should_be_discoverable_when_registered_as_an_entry_point():
     loaded = catalog.get("loc-cap")
 
     assert loaded is LocCap
+
+
+def loc_cap_should_ignore_oversize_tests_when_paths_selects_production():
+    blob = "x = 1\n" * 1001
+    ws = FakeWorkspace(files={"pkg/a.py": "x = 1\n", "tests/huge.py": blob})
+
+    result = LocCap(paths=("pkg/**/*.py",)).check(ws)
+
+    assert result.state is State.PASS
+
+
+def loc_cap_should_fail_when_paths_selects_an_oversize_module():
+    blob = "x = 1\n" * 1001
+    ws = FakeWorkspace(files={"pkg/a.py": blob, "tests/huge.py": blob})
+
+    result = LocCap(paths=("pkg/**/*.py",)).check(ws)
+
+    assert result.state is State.FAIL

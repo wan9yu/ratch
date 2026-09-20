@@ -1,5 +1,6 @@
 """loc-cap check."""
 from ratch.check import Plant
+from ratch.checks import match_globs
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
@@ -8,7 +9,8 @@ class LocCap:
     """Cap tracked Python modules at a line budget.
 
     Rule:
-        No tracked *.py file may exceed max_lines physical lines.
+        No selected *.py file may exceed max_lines physical lines.
+        paths=None scans every tracked Python file (this repo's default).
 
     Why:
         A module that grows without bound hides complexity; a flat cap
@@ -30,11 +32,12 @@ class LocCap:
     confidence = "inferred"
     tolerates_unparseable = False
 
-    def __init__(self, min_surface=1, max_lines=1000):
+    def __init__(self, min_surface=1, max_lines=1000, paths=None):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
         self.max_lines = max_lines
+        self.paths = None if paths is None else tuple(paths)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -47,11 +50,15 @@ class LocCap:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if not path.endswith(".py"):
+            if self.paths is None:
+                if not path.endswith(".py"):
+                    continue
+            elif not match_globs(path, self.paths):
                 continue
             examined_n += 1
-            n = ws.read(path).count("\n")
-            if not ws.read(path).endswith("\n") and ws.read(path):
+            text = ws.read(path)
+            n = text.count("\n")
+            if text and not text.endswith("\n"):
                 n += 1
             if n > self.max_lines:
                 findings.append(

@@ -43,3 +43,24 @@ def injected_clock_should_be_discoverable_when_registered_as_an_entry_point():
     loaded = catalog.get("injected-clock")
 
     assert loaded is InjectedClock
+
+
+def injected_clock_should_pass_when_clock_paths_file_is_absent():
+    ws = FakeWorkspace(files={"app.py": "import time\nnow = time.time()\n"})
+
+    result = InjectedClock(clock_paths=("pkg/clock.py",)).check(ws)
+
+    assert result.state is State.PASS
+
+
+def injected_clock_should_fail_when_clock_paths_exists_and_app_reads_time():
+    ws = FakeWorkspace(files={
+        "pkg/clock.py": "class Clock:\n    pass\n",
+        "pkg/app.py": "import time\nnow = time.time()\n",
+    })
+
+    result = InjectedClock(
+        clock_paths=("pkg/clock.py",), paths=("pkg/**/*.py",),
+    ).check(ws)
+
+    assert result.state is State.FAIL

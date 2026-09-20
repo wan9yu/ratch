@@ -41,3 +41,14 @@ def doc_cli_examples_valid_should_be_discoverable_when_registered_as_an_entry_po
     loaded = catalog.get("doc-cli-examples-valid")
 
     assert loaded is DocCliExamplesValid
+
+
+def doc_cli_examples_valid_should_ignore_other_markdown_when_paths_selects_readme():
+    ws = FakeWorkspace(files={
+        "README.md": "`ratch check`\n",
+        "notes.md": "`ratch frobnicate`\n",
+    })
+
+    result = DocCliExamplesValid(paths=("README.md",)).check(ws)
+
+    assert result.state is State.PASS
