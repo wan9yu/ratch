@@ -8,8 +8,8 @@ class CatalogSize:
     """Report how many checks are installed, without gating.
 
     Rule:
-        The installed ratch.checks catalog size is reported as a
-        measured value.
+        Reports enabled_n (manifest CHECKS) and catalog_n (entry
+        points) as a measured value.
 
     Why:
         A gate that failed the run because the catalog was empty would
@@ -38,17 +38,24 @@ class CatalogSize:
         self.min_surface = min_surface
 
     def check(self, ws):
-        n = len(ws.plugin_classes())
+        catalog_n = len(ws.plugin_classes())
+        enabled_n = catalog_n
+        root = getattr(ws, "repo_root", None)
+        if root is not None:
+            from ratch.registry import load_manifest
+            enabled_n = len(load_manifest(root))
         measured = MeasuredValue(
-            value=n, state=MState.MEASURED,
+            value=f"enabled_n={enabled_n} catalog_n={catalog_n}",
+            state=MState.MEASURED,
             source="plugin_classes", measured_at=ws.now(),
         )
-        if n < self.min_surface:
+        if catalog_n < self.min_surface:
             state = State.VACUOUS
         else:
             state = State.PASS
         return Result(
-            self.id, state, examined_n=n, findings=[], measured=measured,
+            self.id, state, examined_n=catalog_n, findings=[],
+            measured=measured,
         )
 
     def plants(self, ws):

@@ -14,12 +14,12 @@ def discover_should_resolve_no_forbidden_literal_when_the_package_is_installed()
     assert found is expected
 
 
-def load_manifest_should_return_the_default_check_when_no_manifest_exists(tmp_path):
+def load_manifest_should_return_no_checks_when_no_manifest_exists(tmp_path):
     checks = load_manifest(tmp_path)
 
-    assert len(checks) == 1
+    found = len(checks)
 
-    assert isinstance(checks[0], NoForbiddenLiteral)
+    assert found == 0
 
 
 def no_forbidden_literal_should_raise_when_min_surface_is_zero():

@@ -114,3 +114,25 @@ def bdd_test_conventions_should_be_discoverable_when_registered_as_an_entry_poin
     expected = BddTestConventions
 
     assert found is expected
+
+
+def bdd_test_conventions_should_ignore_helpers_when_prefix_is_test_():
+    src = (
+        "def make_toml():\n    return 1\n"
+        "def test_foo_should_bar_when_baz():\n"
+        "    x = 1\n\n    y = 2\n\n    assert x\n"
+    )
+    ws = FakeWorkspace(files={"tests/t.py": src})
+
+    result = BddTestConventions(prefix="test_").check(ws)
+
+    assert result.state is State.PASS
+
+
+def bdd_test_conventions_should_skip_body_shape_when_blank_blocks_is_zero():
+    src = "def foo_should_bar_when_baz():\n    x = 1\n    assert x\n"
+    ws = FakeWorkspace(files={"tests/t.py": src})
+
+    result = BddTestConventions(blank_blocks=0).check(ws)
+
+    assert result.state is State.PASS

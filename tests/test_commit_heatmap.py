@@ -18,7 +18,14 @@ _LOG = (
 
 
 def _ws(log=_LOG):
-    return FakeWorkspace(files={"a.py": "x = 1\n"}, git_log_text=log)
+    return FakeWorkspace(
+        files={
+            "a.py": "x = 1\n",
+            "ratch/checks/a.py": "x = 1\n",
+            "tests/t.py": "x = 1\n",
+        },
+        git_log_text=log,
+    )
 
 
 def parse_log_should_read_insert_and_delete_counts_when_numstat_line_is_plain():

@@ -18,7 +18,7 @@ def catalog_size_should_pass_when_the_workspace_has_plugins():
 
     assert result.state is State.PASS
     assert result.measured is not None
-    assert result.measured.value == 1
+    assert "catalog_n=1" in str(result.measured.value)
     assert result.measured.state is MState.MEASURED
 
 

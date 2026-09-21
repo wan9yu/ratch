@@ -49,7 +49,7 @@ class NoExternalFontCdn:
         if findings:
             return State.FAIL
         if examined_n < self.min_surface:
-            return State.VACUOUS
+            return State.NOT_APPLICABLE
         return State.PASS
 
     def check(self, ws):

@@ -1,8 +1,8 @@
 """The ratch repo dogfoods every tooth it ships.
 
 load_manifest read at this repo's own root must return the twenty-three ids in
-ratch_checks.py CHECKS, not the single-check default a fresh repo falls
-back to. no-external-font-cdn is shipped as an entry point only.
+ratch_checks.py CHECKS, not the empty default a fresh repo falls back to.
+no-external-font-cdn is shipped as an entry point only.
 """
 import importlib
 

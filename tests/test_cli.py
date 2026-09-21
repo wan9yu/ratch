@@ -6,9 +6,18 @@ from ratch.registry import discover
 from ratch.testing import make_tmp_repo
 
 
+_MANIFEST = (
+    "from ratch.checks.forbidden_literal import NoForbiddenLiteral\n"
+    "CHECKS = [NoForbiddenLiteral()]\n"
+)
+
+
 def main_should_return_one_when_the_repo_has_a_violation(tmp_path, monkeypatch):
     banned = "cl" + "aude"
-    repo = make_tmp_repo(tmp_path, {"pkg/mod.py": f'MARK = "{banned}"\n'})
+    repo = make_tmp_repo(tmp_path, {
+        "pkg/mod.py": f'MARK = "{banned}"\n',
+        "ratch_checks.py": _MANIFEST,
+    })
     monkeypatch.chdir(repo)
     monkeypatch.setattr(os, "nice", lambda n: None)
 
@@ -18,7 +27,10 @@ def main_should_return_one_when_the_repo_has_a_violation(tmp_path, monkeypatch):
 
 
 def main_should_return_zero_when_the_repo_is_clean(tmp_path, monkeypatch):
-    repo = make_tmp_repo(tmp_path, {"pkg/mod.py": "MARK = 'clean'\n"})
+    repo = make_tmp_repo(tmp_path, {
+        "pkg/mod.py": "MARK = 'clean'\n",
+        "ratch_checks.py": _MANIFEST,
+    })
     monkeypatch.chdir(repo)
     monkeypatch.setattr(os, "nice", lambda n: None)
 
@@ -51,7 +63,7 @@ def main_should_list_discovered_plugins_when_invoked_with_list(
         assert line == f"{name:<{width}}{label}"
         labels[name] = label
     assert set(labels.values()) <= {"enabled", "catalog"}
-    assert labels["no-forbidden-literal"] == "enabled"
+    assert labels["no-forbidden-literal"] == "catalog"
     assert labels["no-external-font-cdn"] == "catalog"
 
 

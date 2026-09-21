@@ -68,7 +68,7 @@ def no_ai_signatures_should_pass_when_history_carries_no_attribution_shape():
     assert result.findings == []
 
 
-def no_ai_signatures_should_be_vacuous_when_the_repo_is_shallow():
+def no_ai_signatures_should_fail_when_the_repo_is_shallow():
     sha = "deadbeef0badf00d"
     trailer = "feat: x\n\nCo-Authored-By: Bot <bot@example.test>\n"
     ws = FakeWorkspace(
@@ -80,9 +80,8 @@ def no_ai_signatures_should_be_vacuous_when_the_repo_is_shallow():
 
     result = NoAiSignatures().check(ws)
 
-    assert result.state is State.VACUOUS
-    assert result.examined_n == 0
-    assert result.findings == []
+    assert result.state is State.FAIL
+    assert any(f.anchor == "shallow" for f in result.findings)
 
 
 def no_ai_signatures_should_fail_when_trailer_uses_github_lowercase_casing():

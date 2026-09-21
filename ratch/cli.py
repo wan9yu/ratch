@@ -5,6 +5,7 @@ Only check builds a Workspace and a Runner (and may request nicing).
 """
 import argparse
 import inspect
+import os
 import pathlib
 import sys
 
@@ -21,6 +22,7 @@ def build_parser():
     sub = parser.add_subparsers(dest="command", required=True)
     check = sub.add_parser("check")
     check.add_argument("--staged", action="store_true")
+    check.add_argument("--compact", action="store_true")
     sub.add_parser("list")
     describe = sub.add_parser("describe")
     describe.add_argument("id")
@@ -57,6 +59,8 @@ def main(argv=None):
     if args.command == "describe":
         return cmd_describe(args.id)
 
+    if args.compact:
+        os.environ["RATCH_COMPACT"] = "1"
     view = "index" if args.staged else "worktree"
     ws = Workspace(cwd, view)
     checks = load_manifest(cwd)

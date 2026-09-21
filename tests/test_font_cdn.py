@@ -27,12 +27,12 @@ def no_external_font_cdn_should_pass_when_css_uses_local_fonts():
     assert result.state is State.PASS
 
 
-def no_external_font_cdn_should_be_vacuous_when_no_web_file_is_present():
+def no_external_font_cdn_should_be_not_applicable_when_no_web_file_is_present():
     ws = FakeWorkspace(files={"a.py": "x = 1\n"})
 
     result = NoExternalFontCdn().check(ws)
 
-    assert result.state is State.VACUOUS
+    assert result.state is State.NOT_APPLICABLE
 
 
 def no_external_font_cdn_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):

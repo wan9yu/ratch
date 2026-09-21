@@ -9,8 +9,6 @@ import importlib.metadata
 import importlib.util
 import pathlib
 
-from ratch.checks.forbidden_literal import NoForbiddenLiteral
-
 __all__ = ["discover", "load_manifest"]
 
 
@@ -21,16 +19,18 @@ def discover():
 
 
 def load_manifest(repo_root):
-    """Return the check instances a repo declares, or the default gate.
+    """Return the check instances a repo declares, or an empty list.
 
-    A repo opts into a custom check set by exposing a CHECKS list from a
-    ratch_checks.py module at its root; absent that file, the default
-    surface is the single forbidden-literal gate.
+    A repo opts into checks by exposing CHECKS from ratch_checks.py at
+    its root. Absent that file, nothing runs: a silent default gate
+    would scan product names in consumer READMEs.
     """
     manifest = pathlib.Path(repo_root) / "ratch_checks.py"
-    if manifest.is_file():
-        spec = importlib.util.spec_from_file_location("ratch_checks", manifest)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        return list(module.CHECKS)
-    return [NoForbiddenLiteral()]
+    if not manifest.is_file():
+        return []
+    spec = importlib.util.spec_from_file_location("ratch_checks", manifest)
+    if spec is None or spec.loader is None:
+        return []
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return list(module.CHECKS)

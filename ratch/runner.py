@@ -39,6 +39,8 @@ def derive_state(raw, examined_n, unparseable_n, tolerates_unparseable,
     """
     if raw is State.ERROR:
         return State.ERROR
+    if raw is State.NOT_APPLICABLE:
+        return State.NOT_APPLICABLE
     if unparseable_n > 0 and not tolerates_unparseable:
         return State.FAIL
     if findings:

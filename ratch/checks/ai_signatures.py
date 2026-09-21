@@ -53,11 +53,13 @@ class NoAiSignatures:
         r"Assisted by",
         "\N{ROBOT FACE}",
         r"[\w.+-]+@users\.noreply\.[\w.]+",
-    ), min_surface=1):
+    ), min_surface=1, sources=("log",), files=()):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.patterns = tuple(patterns)
         self.min_surface = min_surface
+        self.sources = tuple(sources)
+        self.files = tuple(files)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -70,12 +72,29 @@ class NoAiSignatures:
         proc = ws.run(["git", "rev-parse", "--is-shallow-repository"])
         return proc.stdout.strip() == "true"
 
+    def _scan(self, haystack, path, prefix, findings):
+        for pattern in self.patterns:
+            if re.search(pattern, haystack, re.IGNORECASE):
+                anchor = f"{prefix}:{pattern}"
+                findings.append(
+                    Finding(self.id, path, anchor,
+                            message=f"provenance leak {anchor}")
+                )
+
     def check(self, ws):
         findings = []
         examined_n = 0
-        if not self._is_shallow(ws):
+        if self._is_shallow(ws):
+            findings.append(
+                Finding(self.id, "<git>", "shallow",
+                        message="shallow clone; history is incomplete")
+            )
+            return Result(
+                self.id, State.FAIL, examined_n=1,
+                skipped_n=ws.skipped_n, findings=findings,
+            )
+        if "log" in self.sources:
             raw = ws.git_log(
-                rng=None,
                 fmt="%H%x00%an%x00%ae%x00%cn%x00%ce%x00%B%x00",
             )
             fields = raw.split("\x00")
@@ -84,16 +103,23 @@ class NoAiSignatures:
                 an, ae, cn, ce, body = fields[i + 1:i + 6]
                 examined_n += 1
                 haystack = "\n".join([an, ae, cn, ce, body])
-                for pattern in self.patterns:
-                    # IGNORECASE so GitHub's canonical `Co-authored-by:` casing
-                    # (and `generated with` / `assisted by`) is caught too
-                    # (resolves Fable finding: default missed lowercase trailers).
-                    if re.search(pattern, haystack, re.IGNORECASE):
-                        anchor = f"{sha[:9]}:{pattern}"
-                        findings.append(
-                            Finding(self.id, "<commit>", anchor,
-                                    message=f"provenance leak {anchor}")
-                        )
+                self._scan(haystack, "<commit>", sha[:9], findings)
+        if "tags" in self.sources:
+            proc = ws.run([
+                "git", "for-each-ref", "refs/tags",
+                "--format=%(refname)%x00%(contents)",
+            ])
+            blob = proc.stdout or ""
+            if blob.strip():
+                examined_n += 1
+                self._scan(blob, "<tag>", "tag", findings)
+        if "files" in self.sources:
+            tracked = set(ws.tracked_files())
+            for path in self.files:
+                if path not in tracked:
+                    continue
+                examined_n += 1
+                self._scan(ws.read(path), path, path, findings)
         return Result(
             self.id, self._state(findings, examined_n),
             examined_n=examined_n, skipped_n=ws.skipped_n,

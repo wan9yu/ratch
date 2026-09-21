@@ -9,8 +9,10 @@ from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
 
-def _is_bdd_name(name):
-    if name.startswith("test_"):
+def _is_bdd_name(name, prefix):
+    if prefix and not name.startswith(prefix):
+        return None
+    if not prefix and name.startswith("test_"):
         return False
     if "_should_" not in name or "_when_" not in name:
         return False
@@ -37,11 +39,12 @@ class BddTestConventions:
     """Require BDD test names in tracked test modules.
 
     Rule:
-        In tracked tests/*.py, every top-level def whose name does not
-        start with underscore must contain _should_ and _when_, must not
-        start with test_, and must not use or as a snake_case segment.
-        The body must be three blocks separated by two blank lines.
-        Labels such as given/when/then are allowed and ignored.
+        In tracked tests/*.py, selected top-level defs must contain
+        _should_ and _when_ and must not use or as a snake_case segment.
+        prefix="" (this repo) inspects every public def and forbids a
+        test_ prefix. prefix="test_" inspects only that prefix (helpers
+        are ignored). blank_blocks=3 requires two blank-line gaps;
+        blank_blocks=0 skips body shape. Labels are ignored.
 
     Why:
         A test name that reads as a sentence is the readable spec; a
@@ -67,10 +70,12 @@ class BddTestConventions:
     confidence = "inferred"
     tolerates_unparseable = False
 
-    def __init__(self, min_surface=1):
+    def __init__(self, min_surface=1, prefix="", blank_blocks=3):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
+        self.prefix = prefix
+        self.blank_blocks = blank_blocks
 
     def _state(self, findings, examined_n):
         if findings:
@@ -96,13 +101,16 @@ class BddTestConventions:
                 name = node.name
                 if name.startswith("_"):
                     continue
-                if not _is_bdd_name(name):
+                verdict = _is_bdd_name(name, self.prefix)
+                if verdict is None:
+                    continue
+                if not verdict:
                     findings.append(
                         Finding(self.id, path, name,
                                 message=f"bdd name: {name}")
                     )
                     continue
-                if _paragraph_n(node, lines) < 3:
+                if self.blank_blocks and _paragraph_n(node, lines) < self.blank_blocks:
                     findings.append(
                         Finding(self.id, path, name,
                                 message=f"bdd blank: {name}")

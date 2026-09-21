@@ -1,4 +1,5 @@
 """commit-heatmap eye: directory groups, file rows, time columns."""
+import os
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
@@ -27,8 +28,14 @@ _GROWTH_STEPS = (
     (316, "#", "@"),
 )
 _GROWTH_CAPTION = (
-    "growth (per-column ins-del, log ladder, not file size; full history)"
+    "growth (per-column ins-del, log ladder, not file size; tracked only)"
 )
+
+
+def _want_compact():
+    if os.environ.get("RATCH_COMPACT"):
+        return True
+    return os.environ.get("CI", "").lower() in {"1", "true"}
 
 
 def _top_dir(path):
@@ -242,11 +249,14 @@ class CommitHeatmap:
         touch_dir_n = Counter()
         touch_file_n = Counter()
         grow_file_n = Counter()
+        tracked = set(ws.tracked_files())
         for ts, files in commits:
             col = _bucket_key(ts, grain)
             if col not in retained:
                 continue
             for path, ins, dele in files:
+                if path not in tracked:
+                    continue
                 top = _top_dir(path)
                 touch_dir[(top, col)] += 1
                 touch_dir_n[top] += 1
@@ -273,8 +283,15 @@ class CommitHeatmap:
             _GROWTH_CAPTION, grow_dir, grow_file, dirs,
             _group(dirs, grow_files), cols, _growth_char,
         ))
+        if _want_compact():
+            value = (
+                f"tracked-only commits={n} dirs={len(dirs)} "
+                f"files={len(touch_files)}"
+            )
+        else:
+            value = "\n".join(lines)
         measured = MeasuredValue(
-            value="\n".join(lines),
+            value=value,
             state=MState.MEASURED,
             source="git_log:numstat",
             measured_at=ws.now(),
@@ -292,7 +309,11 @@ class CommitHeatmap:
 
     def fixture(self, kit):
         return FakeWorkspace(
-            files={"a.py": "x = 1\n"},
+            files={
+                "a.py": "x = 1\n",
+                "ratch/checks/a.py": "x = 1\n",
+                "tests/t.py": "x = 1\n",
+            },
             git_log_text=(
                 "\x1e1700000000\n"
                 "12\t0\tratch/checks/a.py\n"
