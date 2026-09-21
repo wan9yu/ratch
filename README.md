@@ -47,7 +47,7 @@ and CI install, run pytest, then `ratch check`.
 - `doc-counts-match-ssot` — README `catalog_n` equals `discover()`
 - `docs-equal-fresh-render` — the generated region matches a live render
 - `tests-repo-root-ssot` — tests import one ROOT helper, not Path(__file__) walks
-- `injected-clock` — raw time.time only if a Clock type exists
+- `injected-clock` — stdlib time/datetime calls only if a Clock type exists
 - `doc-cli-examples-valid` — documented ratch commands parse
 - `no-autoclose-keywords-in-commits` — commit messages that would auto-close issues
 

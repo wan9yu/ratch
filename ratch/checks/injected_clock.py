@@ -17,13 +17,67 @@ def _has_clock_class(tree):
     return False
 
 
+def _bindings(tree):
+    out = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name in ("time", "datetime"):
+                    out[alias.asname or alias.name] = ("mod", alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module == "time":
+            for alias in node.names:
+                out[alias.asname or alias.name] = ("func", alias.name)
+        elif isinstance(node, ast.ImportFrom) and node.module == "datetime":
+            for alias in node.names:
+                if alias.name == "datetime":
+                    out[alias.asname or alias.name] = ("cls", "datetime")
+    return out
+
+
+def _raw_call_attr(func, binds):
+    if isinstance(func, ast.Name):
+        bind = binds.get(func.id)
+        if bind is not None and bind[0] == "func" and bind[1] in _TIME_ATTRS:
+            return bind[1]
+        return None
+    if not isinstance(func, ast.Attribute):
+        return None
+    if isinstance(func.value, ast.Name):
+        bind = binds.get(func.value.id)
+        if bind is None:
+            return None
+        kind, origin = bind
+        if kind == "mod" and origin == "time" and func.attr in _TIME_ATTRS:
+            return func.attr
+        if (
+            kind in ("mod", "cls")
+            and origin == "datetime"
+            and func.attr in _DT_ATTRS
+        ):
+            return func.attr
+        return None
+    if not isinstance(func.value, ast.Attribute):
+        return None
+    if not isinstance(func.value.value, ast.Name):
+        return None
+    if (
+        binds.get(func.value.value.id) == ("mod", "datetime")
+        and func.value.attr == "datetime"
+        and func.attr in _DT_ATTRS
+    ):
+        return func.attr
+    return None
+
+
 def _time_hits(tree):
+    binds = _bindings(tree)
     hits = []
     for node in ast.walk(tree):
-        if not isinstance(node, ast.Attribute):
+        if not isinstance(node, ast.Call):
             continue
-        if node.attr in _TIME_ATTRS or node.attr in _DT_ATTRS:
-            hits.append(node.attr)
+        hit = _raw_call_attr(node.func, binds)
+        if hit is not None:
+            hits.append(hit)
     return hits
 
 
@@ -32,8 +86,10 @@ class InjectedClock:
 
     Rule:
         Default: if any tracked *.py defines class Clock, other modules
-        must not call time.time / sleep or datetime.now / today except
-        clock_path. clock_paths= arms only when those files exist;
+        must not call bound stdlib time.time / sleep or datetime.now /
+        today except clock_path. Import aliases and from-imports count.
+        clock.sleep / SYSTEM_CLOCK.monotonic are the wait/time seam,
+        not a leak. clock_paths= arms only when those files exist;
         paths= then limits which modules are confined. This repo uses
         the default (no Clock type → PASS).
 
@@ -42,11 +98,11 @@ class InjectedClock:
         makes time uninjectable.
 
     Proven in:
-        AST attribute scan. No Clock type → VACUOUS (nothing to confine).
+        AST Call scan after resolving time/datetime bindings.
 
     Not this:
-        Not a ban on datetime.timedelta. Not a requirement to invent a
-        Clock where none exists.
+        Not a ban on datetime.timedelta. Not a ban on Clock.sleep.
+        Not a requirement to invent a Clock where none exists.
     """
 
     id = "injected-clock"

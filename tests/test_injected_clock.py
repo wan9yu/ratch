@@ -29,6 +29,64 @@ def injected_clock_should_fail_when_a_clock_exists_and_time_is_raw():
     assert found is expected
 
 
+def _armed(app):
+    return FakeWorkspace(files={
+        "clock.py": "class Clock:\n    pass\n",
+        "app.py": app,
+    })
+
+
+def injected_clock_should_pass_when_injected_clock_sleep_is_called():
+    ws = FakeWorkspace(files={
+        "clock.py": "class Clock:\n    def sleep(self, n):\n        pass\n",
+        "app.py": "def run(clock):\n    clock.sleep(1)\n",
+    })
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.PASS
+
+
+def injected_clock_should_fail_when_sleep_is_imported_from_time():
+    ws = _armed("from time import sleep\nsleep(1)\n")
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.FAIL
+
+
+def injected_clock_should_fail_when_datetime_now_is_imported_from_datetime():
+    ws = _armed("from datetime import datetime\ndatetime.now()\n")
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.FAIL
+
+
+def injected_clock_should_fail_when_datetime_datetime_now_is_called():
+    ws = _armed("import datetime\ndatetime.datetime.now()\n")
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.FAIL
+
+
+def injected_clock_should_pass_when_system_clock_monotonic_is_called():
+    ws = _armed("SYSTEM_CLOCK.monotonic()\n")
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.PASS
+
+
+def injected_clock_should_fail_when_time_is_imported_under_an_alias():
+    ws = _armed("import time as t\nt.time()\n")
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.FAIL
+
+
 def injected_clock_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
     check = InjectedClock()
 
