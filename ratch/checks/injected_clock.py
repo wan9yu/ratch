@@ -29,15 +29,15 @@ def _bindings(tree):
                 out[alias.asname or alias.name] = ("func", alias.name)
         elif isinstance(node, ast.ImportFrom) and node.module == "datetime":
             for alias in node.names:
-                if alias.name == "datetime":
-                    out[alias.asname or alias.name] = ("cls", "datetime")
+                if alias.name in ("datetime", "date"):
+                    out[alias.asname or alias.name] = ("cls", alias.name)
     return out
 
 
-def _raw_call_attr(func, binds):
+def _raw_call_attr(func, binds, time_attrs, dt_attrs):
     if isinstance(func, ast.Name):
         bind = binds.get(func.id)
-        if bind is not None and bind[0] == "func" and bind[1] in _TIME_ATTRS:
+        if bind is not None and bind[0] == "func" and bind[1] in time_attrs:
             return bind[1]
         return None
     if not isinstance(func, ast.Attribute):
@@ -47,12 +47,11 @@ def _raw_call_attr(func, binds):
         if bind is None:
             return None
         kind, origin = bind
-        if kind == "mod" and origin == "time" and func.attr in _TIME_ATTRS:
+        if kind == "mod" and origin == "time" and func.attr in time_attrs:
             return func.attr
-        if (
-            kind in ("mod", "cls")
-            and origin == "datetime"
-            and func.attr in _DT_ATTRS
+        if func.attr in dt_attrs and (
+            (kind == "cls" and origin in ("date", "datetime"))
+            or (kind == "mod" and origin == "datetime")
         ):
             return func.attr
         return None
@@ -62,20 +61,20 @@ def _raw_call_attr(func, binds):
         return None
     if (
         binds.get(func.value.value.id) == ("mod", "datetime")
-        and func.value.attr == "datetime"
-        and func.attr in _DT_ATTRS
+        and func.value.attr in ("datetime", "date")
+        and func.attr in dt_attrs
     ):
         return func.attr
     return None
 
 
-def _time_hits(tree):
+def _time_hits(tree, time_attrs, dt_attrs):
     binds = _bindings(tree)
     hits = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
-        hit = _raw_call_attr(node.func, binds)
+        hit = _raw_call_attr(node.func, binds, time_attrs, dt_attrs)
         if hit is not None:
             hits.append(hit)
     return hits
@@ -89,9 +88,11 @@ class InjectedClock:
         must not call bound stdlib time.time / sleep or datetime.now /
         today except clock_path. Import aliases and from-imports count.
         clock.sleep / SYSTEM_CLOCK.monotonic are the wait/time seam,
-        not a leak. clock_paths= arms only when those files exist;
-        paths= then limits which modules are confined. This repo uses
-        the default (no Clock type → PASS).
+        not a leak. extra_time_attrs= / extra_dt_attrs= extend the Call
+        sets (strftime is time-module only). from datetime import date
+        is bound, so date.today() is a default leak. clock_paths= arms
+        only when those files exist; paths= then limits which modules
+        are confined. This repo uses the default (no Clock type → PASS).
 
     Why:
         Tests and production must share one clock; a raw now() call
@@ -114,13 +115,16 @@ class InjectedClock:
     tolerates_unparseable = False
 
     def __init__(self, min_surface=1, clock_path="clock.py",
-                 clock_paths=None, paths=None):
+                 clock_paths=None, paths=None,
+                 extra_time_attrs=(), extra_dt_attrs=()):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
         self.clock_path = clock_path
         self.clock_paths = None if clock_paths is None else tuple(clock_paths)
         self.paths = None if paths is None else tuple(paths)
+        self.time_attrs = _TIME_ATTRS | frozenset(extra_time_attrs)
+        self.dt_attrs = _DT_ATTRS | frozenset(extra_dt_attrs)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -161,7 +165,7 @@ class InjectedClock:
             if self._clock_ok(path) or not match_globs(path, self.paths):
                 continue
             examined_n += 1
-            hits = _time_hits(tree)
+            hits = _time_hits(tree, self.time_attrs, self.dt_attrs)
             if hits:
                 findings.append(
                     Finding(self.id, path, hits[0],

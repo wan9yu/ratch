@@ -44,7 +44,8 @@ class BddTestConventions:
         prefix="" (this repo) inspects every public def and forbids a
         test_ prefix. prefix="test_" inspects only that prefix (helpers
         are ignored). blank_blocks=3 requires two blank-line gaps;
-        blank_blocks=0 skips body shape. Labels are ignored.
+        blank_blocks=0 skips body shape. forbid_comment_labels=()
+        is idle; a nonempty tuple flags a standalone `# label` line.
 
     Why:
         A test name that reads as a sentence is the readable spec; a
@@ -54,7 +55,7 @@ class BddTestConventions:
     Proven in:
         A test name reads as subject_should_outcome_when_condition,
         with no test_ prefix and no or segment. Two blank lines in the
-        body mark three blocks; no given/when/then labels.
+        body mark three blocks. Standalone comment labels are optional.
 
     Not this:
         Not a requirement on private helpers. Not a ban on tokens that
@@ -70,12 +71,16 @@ class BddTestConventions:
     confidence = "inferred"
     tolerates_unparseable = False
 
-    def __init__(self, min_surface=1, prefix="", blank_blocks=3):
+    def __init__(self, min_surface=1, prefix="", blank_blocks=3,
+                 forbid_comment_labels=()):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
         self.prefix = prefix
         self.blank_blocks = blank_blocks
+        self.forbid_comment_labels = frozenset(
+            label.lower() for label in forbid_comment_labels
+        )
 
     def _state(self, findings, examined_n):
         if findings:
@@ -114,6 +119,16 @@ class BddTestConventions:
                     findings.append(
                         Finding(self.id, path, name,
                                 message=f"bdd blank: {name}")
+                    )
+            for line in lines:
+                token = line.strip()
+                if not token.startswith("#"):
+                    continue
+                label = token[1:].strip().lower()
+                if label in self.forbid_comment_labels:
+                    findings.append(
+                        Finding(self.id, path, label,
+                                message=f"bdd label: {label}")
                     )
         return Result(
             self.id, self._state(findings, examined_n),

@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 
 from ratch.check import Plant
+from ratch.checks import match_globs
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
@@ -28,6 +29,8 @@ class NoForbiddenLiteral:
         No tracked file content, tracked filename, or committer identity may
         match any configured forbidden pattern. patterns=() is idle:
         VACUOUS, no scan. A consumer must pass its own set.
+        exclude_paths= skips content and filename vectors for those
+        globs; commit identity is still scanned.
 
     Why:
         An author-tool literal in shipped content, a path, or a commit trailer
@@ -53,11 +56,12 @@ class NoForbiddenLiteral:
     confidence = "breadth"
     tolerates_unparseable = False
 
-    def __init__(self, patterns=(), min_surface=1):
+    def __init__(self, patterns=(), min_surface=1, exclude_paths=()):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.patterns = tuple(patterns)
         self.min_surface = min_surface
+        self.exclude_paths = tuple(exclude_paths)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -79,12 +83,16 @@ class NoForbiddenLiteral:
         for pattern in self.patterns:
             rx = re.compile(pattern)
             for path, line, text in ws.git_grep(pattern, cached=cached, head=head):
+                if match_globs(path, self.exclude_paths):
+                    continue
                 anchor = " ".join(text.split())
                 findings.append(
                     Finding(self.id, path, anchor, line=line,
                             message=f"content: {anchor}")
                 )
             for path in tracked:
+                if match_globs(path, self.exclude_paths):
+                    continue
                 if rx.search(path):
                     findings.append(
                         Finding(self.id, path, path, message=f"filename: {path}")

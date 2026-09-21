@@ -30,7 +30,8 @@ class RepoRootSSot:
 
     Not this:
         Not a full pathlib SSOT. Not a ban on Path(__file__) for a
-        fixture next to the test. Importing the helper PASSes.
+        fixture next to the test. Importing the helper PASSes. ssot=
+        may be an existing helpers module, not a new repo_root.py.
     """
 
     id = "tests-repo-root-ssot"

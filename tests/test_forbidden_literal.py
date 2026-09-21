@@ -71,6 +71,21 @@ def no_forbidden_literal_should_pass_when_the_tree_is_clean():
     assert result.findings == []
 
 
+def no_forbidden_literal_should_pass_when_the_literal_is_only_in_an_excluded_path():
+    banned = "cl" + "aude"
+    ws = FakeWorkspace(files={
+        "ratch_checks.py": f"NEEDLE = '{banned}'\n",
+        "pkg/mod.py": "x = 1\n",
+    })
+
+    result = NoForbiddenLiteral(
+        patterns=_PATTERNS,
+        exclude_paths=("ratch_checks.py",),
+    ).check(ws)
+
+    assert result.state is State.PASS
+
+
 def no_forbidden_literal_should_bite_on_every_plant_when_checked_against_its_own_fixture(tmp_path):
     check = NoForbiddenLiteral(patterns=_PATTERNS)
 

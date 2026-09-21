@@ -136,3 +136,33 @@ def bdd_test_conventions_should_skip_body_shape_when_blank_blocks_is_zero():
     result = BddTestConventions(blank_blocks=0).check(ws)
 
     assert result.state is State.PASS
+
+
+def bdd_test_conventions_should_fail_when_a_standalone_comment_label_is_forbidden():
+    src = (
+        "def foo_should_bar_when_baz():\n"
+        "    # given\n"
+        "    assert 1\n"
+    )
+    ws = FakeWorkspace(files={"tests/t.py": src})
+
+    result = BddTestConventions(
+        blank_blocks=0, forbid_comment_labels=("given",),
+    ).check(ws)
+
+    assert result.state is State.FAIL
+
+
+def bdd_test_conventions_should_pass_when_a_comment_label_has_more_words():
+    src = (
+        "def foo_should_bar_when_baz():\n"
+        "    # given the user asked\n"
+        "    assert 1\n"
+    )
+    ws = FakeWorkspace(files={"tests/t.py": src})
+
+    result = BddTestConventions(
+        blank_blocks=0, forbid_comment_labels=("given",),
+    ).check(ws)
+
+    assert result.state is State.PASS

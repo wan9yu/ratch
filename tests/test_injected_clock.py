@@ -87,6 +87,30 @@ def injected_clock_should_fail_when_time_is_imported_under_an_alias():
     assert result.state is State.FAIL
 
 
+def injected_clock_should_fail_when_extra_time_attr_is_strftime():
+    ws = _armed("import time\ntime.strftime('%Y')\n")
+
+    result = InjectedClock(extra_time_attrs=("strftime",)).check(ws)
+
+    assert result.state is State.FAIL
+
+
+def injected_clock_should_fail_when_date_today_is_imported_from_datetime():
+    ws = _armed("from datetime import date\ndate.today()\n")
+
+    result = InjectedClock().check(ws)
+
+    assert result.state is State.FAIL
+
+
+def injected_clock_should_pass_when_strftime_is_called_on_a_datetime():
+    ws = _armed("stamp.strftime('%Y')\n")
+
+    result = InjectedClock(extra_time_attrs=("strftime",)).check(ws)
+
+    assert result.state is State.PASS
+
+
 def injected_clock_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
     check = InjectedClock()
 

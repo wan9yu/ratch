@@ -25,7 +25,7 @@ and CI install, run pytest, then `ratch check --compact`.
 
 **Provenance** — commit identity is no longer a person:
 
-- `no-forbidden-literal` — configured tokens in content, paths, or the tip commit; empty `patterns=` is VACUOUS
+- `no-forbidden-literal` — configured tokens in content, paths, or the tip commit; empty `patterns=` is VACUOUS; `exclude_paths=` skips content and filename
 - `no-first-person` — record prose without first-person voice
 - `no-ai-signatures` — attribution trailers; `sources=` can add tags and files; a shallow clone FAILs
 
@@ -36,7 +36,7 @@ and CI install, run pytest, then `ratch check --compact`.
 - `no-pytest-skip` — skipped tests that read green; `paths=` for invariants vs e2e
 - `no-hash-named-test` — test files named with a forgotten hex suffix
 - `todo-has-issue-ref` — debt markers without an issue citation
-- `bdd-test-conventions` — test names that read as a sentence; `prefix=` / `blank_blocks=`
+- `bdd-test-conventions` — test names that read as a sentence; `prefix=` / `blank_blocks=` / `forbid_comment_labels=`
 - `no-circular-import` — a package that only imports in one order
 - `no-reassurance-words` — prose that tells the reader to stop checking
 - `loc-cap` — Python modules over 1000 lines
@@ -50,7 +50,8 @@ and CI install, run pytest, then `ratch check --compact`.
 - `doc-counts-match-ssot` — README `catalog_n` equals `discover()` (meta)
 - `docs-equal-fresh-render` — the generated region matches a live render (meta)
 - `tests-repo-root-ssot` — tests import one ROOT helper, not `__file__` parent walks
-- `injected-clock` — bound stdlib time/datetime calls only if a Clock type exists
+- `injected-clock` — bound stdlib time/datetime calls only if a Clock type exists; `extra_time_attrs=` / `extra_dt_attrs=`
+- `confined-import` — listed imports stay in `allow_paths=`; empty `names=` is VACUOUS
 - `doc-cli-examples-valid` — documented ratch commands parse
 - `no-autoclose-keywords-in-commits` — commit messages that would auto-close issues
 
@@ -71,5 +72,5 @@ can prove.
 <!-- ratch:authored:end -->
 
 <!-- ratch:generated:checks -->
-catalog_n=24
+catalog_n=25
 <!-- ratch:generated:checks:end -->
