@@ -65,10 +65,9 @@ class NoPytestSkip:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if self.paths is None:
-                if not is_test_py(path):
-                    continue
-            elif not match_globs(path, self.paths):
+            if self.paths is None and not is_test_py(path):
+                continue
+            if not match_globs(path, self.paths):
                 continue
             examined_n += 1
             tree = ws.ast(path)

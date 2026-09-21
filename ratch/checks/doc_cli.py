@@ -72,18 +72,18 @@ class DocCliExamplesValid:
             examined_n += 1
             text = ws.read(path)
             snippets = [m.group(1).strip() for m in tick.finditer(text)]
-            prefix = self.prog + " "
-            py_prefix = "python -m " + prefix
-            py3_prefix = "python3 -m " + prefix
+            prefixes = (
+                f"python3 -m {self.prog} ",
+                f"python -m {self.prog} ",
+                f"{self.prog} ",
+            )
             for block in _FENCE.findall(text):
                 for line in block.splitlines():
                     line = line.strip().lstrip("$").strip()
-                    if line.startswith(py_prefix):
-                        snippets.append(line[len(py_prefix):])
-                    elif line.startswith(py3_prefix):
-                        snippets.append(line[len(py3_prefix):])
-                    elif line.startswith(prefix):
-                        snippets.append(line[len(prefix):])
+                    for prefix in prefixes:
+                        if line.startswith(prefix):
+                            snippets.append(line[len(prefix):])
+                            break
             for rest in snippets:
                 try:
                     argv = shlex.split(rest)

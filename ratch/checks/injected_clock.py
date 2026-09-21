@@ -102,9 +102,7 @@ class InjectedClock:
         findings = []
         examined_n = 0
         for path, tree in trees:
-            if self._clock_ok(path):
-                continue
-            if not match_globs(path, self.paths):
+            if self._clock_ok(path) or not match_globs(path, self.paths):
                 continue
             examined_n += 1
             hits = _time_hits(tree)

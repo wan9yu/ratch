@@ -28,7 +28,5 @@ def _match_one(path, pattern):
     rest = path[len(prefix):].lstrip("/") if prefix else path
     if not suffix:
         return True
-    if fnmatch.fnmatch(rest, suffix):
-        return True
     base = rest.rsplit("/", 1)[-1]
-    return fnmatch.fnmatch(base, suffix)
+    return fnmatch.fnmatch(rest, suffix) or fnmatch.fnmatch(base, suffix)

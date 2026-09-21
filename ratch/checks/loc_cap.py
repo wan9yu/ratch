@@ -50,10 +50,9 @@ class LocCap:
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
-            if self.paths is None:
-                if not path.endswith(".py"):
-                    continue
-            elif not match_globs(path, self.paths):
+            if self.paths is None and not path.endswith(".py"):
+                continue
+            if not match_globs(path, self.paths):
                 continue
             examined_n += 1
             text = ws.read(path)
