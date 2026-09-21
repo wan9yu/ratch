@@ -12,8 +12,9 @@ class NoInternalRefs:
     """Forbid pointers into the gitignored working-notes tree.
 
     Rule:
-        Tracked files other than .gitignore must not contain the
-        working-notes directory prefix, in content or in the path.
+        Tracked files other than .gitignore must not contain any
+        configured needle, in content or in the path. needles=() is
+        idle: VACUOUS, no scan.
 
     Why:
         That tree is never shipped. A proven_in or comment that names
@@ -27,6 +28,8 @@ class NoInternalRefs:
     Not this:
         Not a ban on the word in identifiers without the trailing
         slash. Not a scan of .gitignore, which must name the skip.
+        Not a ban on product codenames; pass those as needles= or
+        keep a consumer twin.
     """
 
     id = "no-internal-refs"
@@ -37,10 +40,11 @@ class NoInternalRefs:
     confidence = "inferred"
     tolerates_unparseable = False
 
-    def __init__(self, min_surface=1):
+    def __init__(self, min_surface=1, needles=()):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.min_surface = min_surface
+        self.needles = tuple(needles)
 
     def _state(self, findings, examined_n):
         if findings:
@@ -50,36 +54,44 @@ class NoInternalRefs:
         return State.PASS
 
     def check(self, ws):
+        if not self.needles:
+            return Result(
+                self.id, State.VACUOUS, examined_n=0,
+                skipped_n=ws.skipped_n, findings=[],
+            )
         findings = []
         examined_n = 0
         for path in ws.tracked_files():
             if path in _SKIP:
                 continue
             examined_n += 1
-            if _NEEDLE in path:
-                findings.append(
-                    Finding(self.id, path, path,
-                            message="working-notes prefix in path")
-                )
-                continue
             text = ws.read(path)
-            if _NEEDLE in text:
-                findings.append(
-                    Finding(self.id, path, _NEEDLE,
-                            message="working-notes prefix in content")
-                )
+            for needle in self.needles:
+                if needle in path:
+                    findings.append(
+                        Finding(self.id, path, path,
+                                message="needle in path")
+                    )
+                    break
+                if needle in text:
+                    findings.append(
+                        Finding(self.id, path, needle,
+                                message="needle in content")
+                    )
+                    break
         return Result(
             self.id, self._state(findings, examined_n),
             examined_n=examined_n, skipped_n=ws.skipped_n, findings=findings,
         )
 
     def plants(self, ws):
-        leak = _NEEDLE + "notes.md"
-        yield Plant(
-            label="notes-prefix",
-            planted_ws=FakeWorkspace(files={"a.py": leak + "\n"}),
-            expected=(self.id, "a.py", _NEEDLE),
-        )
+        for needle in self.needles:
+            leak = needle + "notes.md"
+            yield Plant(
+                label=f"notes-prefix:{needle}",
+                planted_ws=FakeWorkspace(files={"a.py": leak + "\n"}),
+                expected=(self.id, "a.py", needle),
+            )
 
     def fixture(self, kit):
         return FakeWorkspace(files={"a.py": "x = 1\n", ".gitignore": _NEEDLE + "\n"})

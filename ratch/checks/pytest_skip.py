@@ -26,7 +26,8 @@ class NoPytestSkip:
 
     Rule:
         Selected tests must not call pytest.skip. paths=None uses
-        tests/*.py (this repo's default).
+        tests/*.py (this repo's default). Consumers with e2e hardware
+        skips should pass paths= for the invariant glob.
 
     Why:
         skip turns a gate into a silent pass; invariants must fail
@@ -37,7 +38,8 @@ class NoPytestSkip:
         silent green.
 
     Not this:
-        Not a ban on pytest.fail or on skipping outside tests/.
+        Not a ban on pytest.fail. Not a ban on e2e environment skips;
+        narrow with paths=.
     """
 
     id = "no-pytest-skip"

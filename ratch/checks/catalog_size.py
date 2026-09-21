@@ -21,7 +21,9 @@ class CatalogSize:
         installed, without failing the run.
 
     Not this:
-        Not a gate. VACUOUS on an empty catalog does not fail the run.
+        Not a gate. Not a debt score: enabled_n below catalog_n is a
+        consumer choosing teeth. catalog_n is wheel entry points,
+        including meta. VACUOUS on an empty catalog does not fail the run.
     """
 
     id = "catalog-size"

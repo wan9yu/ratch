@@ -9,10 +9,19 @@ NoInternalRefs = _mod.NoInternalRefs
 _NEEDLE = _mod._NEEDLE
 
 
-def no_internal_refs_should_fail_when_a_tracked_file_names_the_notes_prefix():
+def no_internal_refs_should_be_vacuous_when_no_needle_is_configured():
     ws = FakeWorkspace(files={"a.py": _NEEDLE + "notes.md\n"})
 
     result = NoInternalRefs().check(ws)
+
+    assert result.state is State.VACUOUS
+    assert result.examined_n == 0
+
+
+def no_internal_refs_should_fail_when_a_tracked_file_names_the_notes_prefix():
+    ws = FakeWorkspace(files={"a.py": _NEEDLE + "notes.md\n"})
+
+    result = NoInternalRefs(needles=(_NEEDLE,)).check(ws)
 
     assert result.state is State.FAIL
     assert any(
@@ -24,13 +33,13 @@ def no_internal_refs_should_fail_when_a_tracked_file_names_the_notes_prefix():
 def no_internal_refs_should_pass_when_only_gitignore_names_the_prefix():
     ws = FakeWorkspace(files={"a.py": "x = 1\n", ".gitignore": _NEEDLE + "\n"})
 
-    result = NoInternalRefs().check(ws)
+    result = NoInternalRefs(needles=(_NEEDLE,)).check(ws)
 
     assert result.state is State.PASS
 
 
 def no_internal_refs_should_bite_its_plants_when_checked_against_its_own_fixture(tmp_path):
-    check = NoInternalRefs()
+    check = NoInternalRefs(needles=(_NEEDLE,))
 
     assert_bites(check, tmp_path)
 

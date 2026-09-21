@@ -34,7 +34,12 @@ def cmd_list(cwd):
     enabled = {check.id for check in load_manifest(cwd)}
     width = max([24, *(len(name) for name in catalog)]) + 1
     for name in sorted(catalog):
-        label = "enabled" if name in enabled else "catalog"
+        if name in enabled:
+            label = "enabled"
+        elif getattr(catalog[name], "kind", "gate") == "meta":
+            label = "meta"
+        else:
+            label = "catalog"
         print(f"{name:<{width}}{label}")
     return 0
 

@@ -27,7 +27,7 @@ def _hand_rolled_repo():
     (root / "seed.py").write_text("x = 1\n")
     (root / "ratch_checks.py").write_text(
         "from ratch.checks.forbidden_literal import NoForbiddenLiteral\n"
-        "CHECKS = [NoForbiddenLiteral()]\n"
+        "CHECKS = [NoForbiddenLiteral(patterns=('cl[a]ude',))]\n"
     )
     subprocess.run(
         ["git", "add", "seed.py", "ratch_checks.py"], cwd=root, check=True,

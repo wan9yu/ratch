@@ -6,7 +6,10 @@ from ratch.checks import is_test_py
 from ratch.result import Finding, Result, State
 from ratch.testing import FakeWorkspace
 
-_RX = re.compile(r"__file__.*parent\.parent|parent\.parent.*__file__")
+_RX = re.compile(
+    r"__file__.*(?:parent\.parent|\.parents\s*\[)"
+    r"|(?:parent\.parent|\.parents\s*\[).*__file__"
+)
 
 
 class RepoRootSSot:
@@ -14,7 +17,8 @@ class RepoRootSSot:
 
     Rule:
         Tracked tests/*.py other than the configured ssot module must
-        not compute the repo root from __file__ and parent.parent.
+        not compute the repo root from __file__ via parent.parent or
+        .parents[N].
 
     Why:
         Seven copies of Path(__file__).parent.parent drift independently;
@@ -25,7 +29,8 @@ class RepoRootSSot:
         walk parents.
 
     Not this:
-        Not a ban on Path(__file__) for a fixture next to the test.
+        Not a full pathlib SSOT. Not a ban on Path(__file__) for a
+        fixture next to the test. Importing the helper PASSes.
     """
 
     id = "tests-repo-root-ssot"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ratch"
-version = "0.1.4"
+version = "0.1.5"
 description = "The ratchet only turns one way: code is the single source of truth."
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"

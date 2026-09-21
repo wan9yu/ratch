@@ -2,7 +2,7 @@
 
 ratch gates itself with every tooth it ships. load_manifest returns this
 CHECKS list for the ratch repo root; a fresh repo with no such module
-still falls back to the single forbidden-literal default.
+runs nothing. Needles that encode this tree are passed explicitly.
 """
 import importlib
 
@@ -72,7 +72,7 @@ NoAutocloseKeywords = importlib.import_module(
 # no-external-font-cdn is an entry point but omitted here: this repo has
 # no html/css/js, so the tooth would be VACUOUS (exit 2).
 CHECKS = [
-    NoForbiddenLiteral(),
+    NoForbiddenLiteral(patterns=("cl[a]ude",)),
     NoFirstPerson(),
     NoAiSignatures(),
     NoCircularImport(package="ratch"),
@@ -88,7 +88,7 @@ CHECKS = [
     DocsEqualFreshRender(),
     CatalogSize(),
     CommitHeatmap(),
-    NoInternalRefs(),
+    NoInternalRefs(needles=("inter" + "nal/",)),
     NoReassuranceWords(),
     RepoRootSSot(),
     LocCap(),

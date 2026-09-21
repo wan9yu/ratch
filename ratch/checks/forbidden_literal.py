@@ -26,7 +26,8 @@ class NoForbiddenLiteral:
 
     Rule:
         No tracked file content, tracked filename, or committer identity may
-        match any configured forbidden pattern.
+        match any configured forbidden pattern. patterns=() is idle:
+        VACUOUS, no scan. A consumer must pass its own set.
 
     Why:
         An author-tool literal in shipped content, a path, or a commit trailer
@@ -39,8 +40,9 @@ class NoForbiddenLiteral:
         is written with a bracket break so the guard never spells it.
 
     Not this:
-        Not a style or taste rule. Naming, wording, and intent are untouched;
-        only an exact pattern match across three mechanical vectors is rejected.
+        Not a style or taste rule. Not a shipped product-name ban.
+        Naming, wording, and intent are untouched; only an exact pattern
+        match across three mechanical vectors is rejected.
     """
 
     id = "no-forbidden-literal"
@@ -51,7 +53,7 @@ class NoForbiddenLiteral:
     confidence = "breadth"
     tolerates_unparseable = False
 
-    def __init__(self, patterns=("cl[a]ude",), min_surface=1):
+    def __init__(self, patterns=(), min_surface=1):
         if min_surface < 1:
             raise ValueError("min_surface must be >= 1")
         self.patterns = tuple(patterns)
@@ -65,6 +67,11 @@ class NoForbiddenLiteral:
         return State.PASS
 
     def check(self, ws):
+        if not self.patterns:
+            return Result(
+                self.id, State.VACUOUS, examined_n=0,
+                skipped_n=ws.skipped_n, findings=[],
+            )
         tracked = ws.tracked_files()
         cached = ws.view == "index"
         head = ws.view == "HEAD"

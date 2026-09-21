@@ -49,6 +49,14 @@ def _instantiate(cls):
     return cls()
 
 
+def _idle_constructor(inst):
+    clean = inst.fixture(None)
+    return (
+        not list(inst.plants(clean))
+        and inst.check(clean).state is State.VACUOUS
+    )
+
+
 def _ban_check(owner, ws):
     findings = []
     examined_n = 0
@@ -288,8 +296,8 @@ class PluginRegistry:
 
     id = "plugin-registry"
     tier = "A"
-    kind = "gate"
-    scope = "global"
+    kind = "meta"
+    scope = "ratch"
     proven_in = ()
     confidence = "breadth"
     tolerates_unparseable = False
@@ -349,10 +357,11 @@ class PluginRegistry:
             try:
                 assert_bites(inst, None)
             except Exception:
-                findings.append(
-                    Finding(self.id, name, "assert_bites",
-                            message=f"{name}: assert_bites")
-                )
+                if not _idle_constructor(inst):
+                    findings.append(
+                        Finding(self.id, name, "assert_bites",
+                                message=f"{name}: assert_bites")
+                    )
         return findings
 
     def check(self, ws):

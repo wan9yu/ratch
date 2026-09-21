@@ -46,8 +46,8 @@ class DocCountsMatchSSot:
 
     id = "doc-counts-match-ssot"
     tier = "A"
-    kind = "gate"
-    scope = "global"
+    kind = "meta"
+    scope = "ratch"
     proven_in = ()
     confidence = "inferred"
     tolerates_unparseable = False

@@ -7,7 +7,7 @@ from ratch.testing import make_tmp_repo
 
 _MANIFEST = (
     "from ratch.checks.forbidden_literal import NoForbiddenLiteral\n"
-    "CHECKS = [NoForbiddenLiteral()]\n"
+    "CHECKS = [NoForbiddenLiteral(patterns=('cl[a]ude',))]\n"
 )
 
 
@@ -61,9 +61,10 @@ def main_should_list_discovered_plugins_when_invoked_with_list(
         name, label = line.split()
         assert line == f"{name:<{width}}{label}"
         labels[name] = label
-    assert set(labels.values()) <= {"enabled", "catalog"}
+    assert set(labels.values()) <= {"enabled", "catalog", "meta"}
     assert labels["no-forbidden-literal"] == "catalog"
     assert labels["no-external-font-cdn"] == "catalog"
+    assert labels["plugin-registry"] == "meta"
 
 
 def main_should_describe_a_plugin_when_the_id_is_known(monkeypatch, capsys):

@@ -2,12 +2,23 @@ from ratch.checks.forbidden_literal import NoForbiddenLiteral
 from ratch.result import State
 from ratch.testing import FakeWorkspace, assert_bites
 
+_PATTERNS = ("cl[a]ude",)
+
+
+def no_forbidden_literal_should_be_vacuous_when_no_pattern_is_configured():
+    ws = FakeWorkspace(files={"pkg/mod.py": "x = 1\n"})
+
+    result = NoForbiddenLiteral().check(ws)
+
+    assert result.state is State.VACUOUS
+    assert result.examined_n == 0
+
 
 def no_forbidden_literal_should_fail_when_the_literal_is_in_tracked_content():
     banned = "cl" + "aude"
     ws = FakeWorkspace(files={"pkg/mod.py": banned + "\n"})
 
-    result = NoForbiddenLiteral().check(ws)
+    result = NoForbiddenLiteral(patterns=_PATTERNS).check(ws)
 
     assert result.state is State.FAIL
     assert any(
@@ -21,7 +32,7 @@ def no_forbidden_literal_should_fail_when_the_literal_is_in_a_tracked_filename()
     path = f"pkg/{banned}_helper.py"
     ws = FakeWorkspace(files={path: "x = 1\n"})
 
-    result = NoForbiddenLiteral().check(ws)
+    result = NoForbiddenLiteral(patterns=_PATTERNS).check(ws)
 
     assert result.state is State.FAIL
     assert any(
@@ -38,7 +49,7 @@ def no_forbidden_literal_should_fail_when_the_literal_is_in_the_committer_email(
         identity={"name": "Dev", "email": email, "subject": "init", "body": ""},
     )
 
-    result = NoForbiddenLiteral().check(ws)
+    result = NoForbiddenLiteral(patterns=_PATTERNS).check(ws)
 
     assert result.state is State.FAIL
     assert any(
@@ -54,14 +65,14 @@ def no_forbidden_literal_should_pass_when_the_tree_is_clean():
                   "subject": "init", "body": ""},
     )
 
-    result = NoForbiddenLiteral().check(ws)
+    result = NoForbiddenLiteral(patterns=_PATTERNS).check(ws)
 
     assert result.state is State.PASS
     assert result.findings == []
 
 
 def no_forbidden_literal_should_bite_on_every_plant_when_checked_against_its_own_fixture(tmp_path):
-    check = NoForbiddenLiteral()
+    check = NoForbiddenLiteral(patterns=_PATTERNS)
 
     assert_bites(check, tmp_path)
 

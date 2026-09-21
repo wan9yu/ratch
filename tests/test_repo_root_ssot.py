@@ -18,6 +18,14 @@ def tests_repo_root_ssot_should_fail_when_a_test_walks_file_parents():
     assert result.state is State.FAIL
 
 
+def tests_repo_root_ssot_should_fail_when_a_test_indexes_file_parents():
+    src = "root = pathlib.Path(__" + "file__).resolve().parents[2]\n"
+
+    result = RepoRootSSot().check(FakeWorkspace(files={"tests/t.py": src}))
+
+    assert result.state is State.FAIL
+
+
 def tests_repo_root_ssot_should_pass_when_tests_import_the_helper():
     ws = FakeWorkspace(files={'tests/repo_root.py': 'ROOT = 1\n', 'tests/t.py': 'from tests.repo_root import ROOT\n'})
 
