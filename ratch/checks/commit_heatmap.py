@@ -33,9 +33,7 @@ _GROWTH_CAPTION = (
 
 
 def _want_compact():
-    if os.environ.get("RATCH_COMPACT"):
-        return True
-    return os.environ.get("CI", "").lower() in {"1", "true"}
+    return bool(os.environ.get("RATCH_COMPACT"))
 
 
 def _top_dir(path):

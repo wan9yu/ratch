@@ -5,7 +5,6 @@ from ratch.cli import main
 from ratch.registry import discover
 from ratch.testing import make_tmp_repo
 
-
 _MANIFEST = (
     "from ratch.checks.forbidden_literal import NoForbiddenLiteral\n"
     "CHECKS = [NoForbiddenLiteral()]\n"

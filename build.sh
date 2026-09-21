@@ -9,4 +9,4 @@ else
 fi
 "$PYTHON" -m pip install -e ".[dev]"
 "$PYTHON" -m pytest -q
-"$PYTHON" -m ratch check
+"$PYTHON" -m ratch check --compact
